@@ -1,13 +1,13 @@
 ---
 # yaml-language-server: $schema=https://schema.blue-build.org/recipe-v1.json
 # image will be published to ghcr.io/<user>/<name>
-name: template
+name: moonos
 # description will be included in the image's metadata
 description: This is my personal OS image.
 
 # the base image to build on top of (FROM) and the version tag to use
-base-image: ghcr.io/ublue-os/silverblue-main
-image-version: 42 # latest is also supported if you want new updates ASAP
+base-image: quay.io/fedora/fedora-sway-atomic
+image-version: latest # latest is also supported if you want new updates ASAP
 
 # module configuration, executed in order
 # you can include multiple instances of the same module
@@ -17,20 +17,36 @@ modules:
       - source: system
         destination: / # copies files/system/* (* means everything inside it) into your image's root folder /
 
+#  - type: akmods
+#    base: main
+#    install:
+#      - openrazer
+#      - v4l2loopback
+#      - xone
+
   - type: dnf
     repos:
       copr:
-        - atim/starship
-    install:
-      packages:
-        - micro
-        - starship
+        - swayfx/swayfx
+        - dwmw2/openconnect
+        - sentry/xone
+#    replace:
+#      - from-repo: dwmw2/openconnect
+#        packages:
+#          - openconnect
     remove:
       packages:
-        # example: removing firefox (in favor of the flatpak)
-        # "firefox" is the main package, "firefox-langpacks" is a dependency
         - firefox
         - firefox-langpacks # also remove firefox dependency (not required for all packages, this is a special case)
+        - sway
+        - Thunar
+        - thunar-archive-plugin
+    install:
+      packages:
+        - distrobox
+        - steam-devices
+        - stow
+        - swayfx
 
   - type: default-flatpaks
     configurations:
@@ -38,8 +54,24 @@ modules:
         scope: system
         # If no repo information is specified, Flathub will be used by default
         install: # system flatpaks we want all users to have and not remove
-          - org.mozilla.firefox
+          - com.github.tchx84.Flatseal
+          - io.gitlab.librewolf-community
+          - org.gnome.Evince
           - org.gnome.Loupe
+          - org.gnome.Nautilus
+          - org.gnome.seahorse.Application
       - scope: user # Also add Flathub user repo, but no user packages
+        install:
+          - com.bitwarden.desktop
+          - com.discordapp.Discord
+          - com.heroicgameslauncher.hgl
+          - com.moonlight_stream.Moonlight
+          - com.parsecgaming.parsec
+          - com.spotify.Client
+          - com.valvesoftware.Steam
+          - eu.betterbird.Betterbird
+          - io.ente.auth
+          - io.github.thetumultuousunicornofdarkness.cpu-x
+          - org.remmina.Remmina
 
   - type: signing # this sets up the proper policy & signing files for signed images to work fully
