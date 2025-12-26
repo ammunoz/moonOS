@@ -26,6 +26,10 @@ modules:
 #      - v4l2loopback
 #      - xone
 
+  - type: script
+    scripts:
+      - install-xone.sh
+
   - type: dnf
     repos:
       copr:
