@@ -17,6 +17,8 @@ modules:
       - source: system
         destination: / # copies files/system/* (* means everything inside it) into your image's root folder /
 
+# akmods module only works for ubuild base images.
+# There currently are no ublue images for sway atomic.
 #  - type: akmods
 #    base: main
 #    install:
@@ -30,10 +32,10 @@ modules:
         - swayfx/swayfx
         - dwmw2/openconnect
         - sentry/xone
-#    replace:
-#      - from-repo: dwmw2/openconnect
-#        packages:
-#          - openconnect
+    replace:
+      - from-repo: copr:copr.fedorainfracloud.org:dwmw2:openconnect
+        packages:
+          - openconnect
     remove:
       packages:
         - firefox
@@ -47,6 +49,8 @@ modules:
         - steam-devices
         - stow
         - swayfx
+# Unable to install xone even as copr. copr relies on `akmodsbuild` which cannot be run as root.  See akmods section above.
+#        - xone
 
   - type: default-flatpaks
     configurations:
