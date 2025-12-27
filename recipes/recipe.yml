@@ -1,16 +1,11 @@
 ---
 # yaml-language-server: $schema=https://schema.blue-build.org/recipe-v1.json
-# image will be published to ghcr.io/<user>/<name>
+# image will be published to ghcr.io/ammunoz/moonos
 name: moonos
-# description will be included in the image's metadata
-description: This is my personal OS image.
-
-# the base image to build on top of (FROM) and the version tag to use
+description: Personally official moonOS image.
 base-image: quay.io/fedora/fedora-sway-atomic
-image-version: latest # latest is also supported if you want new updates ASAP
+image-version: latest
 
-# module configuration, executed in order
-# you can include multiple instances of the same module
 modules:
   - type: files
     files:
@@ -46,6 +41,7 @@ modules:
     install:
       packages:
         - distrobox
+        - htop
         - steam-devices
         - stow
         - swayfx
@@ -60,6 +56,7 @@ modules:
         install: # system flatpaks we want all users to have and not remove
           - com.github.tchx84.Flatseal
           - io.gitlab.librewolf-community
+          - org.gnome.Calculator
           - org.gnome.Evince
           - org.gnome.Loupe
           - org.gnome.Nautilus
@@ -78,4 +75,4 @@ modules:
           - io.github.thetumultuousunicornofdarkness.cpu-x
           - org.remmina.Remmina
 
-  - type: signing # this sets up the proper policy & signing files for signed images to work fully
+  - type: signing
