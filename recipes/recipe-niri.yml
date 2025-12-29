@@ -1,0 +1,69 @@
+---
+# yaml-language-server: $schema=https://schema.blue-build.org/recipe-v1.json
+# image will be published to ghcr.io/ammunoz/moonos-niri
+name: moonos-niri
+description: (Niri) Personally official moonOS image.
+base-image: ghcr.io/wayblueorg/niri
+image-version: latest
+
+modules:
+  - type: files
+    files:
+      - source: system
+        destination: / # copies files/system/* (* means everything inside it) into your image's root folder /
+
+  - type: akmods
+    base: main
+    install:
+      - openrazer
+      - v4l2loopback
+      - xone
+
+  - type: dnf
+    repos:
+      copr:
+        - swayfx/swayfx
+        - dwmw2/openconnect
+    replace:
+      - from-repo: copr:copr.fedorainfracloud.org:dwmw2:openconnect
+        packages:
+          - openconnect
+    remove:
+      packages:
+        - firefox
+        - firefox-langpacks # also remove firefox dependency (not required for all packages, this is a special case)
+        - vim
+    install:
+      packages:
+        - htop
+        - steam-devices
+        - stow
+
+  - type: default-flatpaks
+    configurations:
+      - notify: true # Send notification after install/uninstall is finished (true/false)
+        scope: system
+        # If no repo information is specified, Flathub will be used by default
+        install: # system flatpaks we want all users to have and not remove
+          - com.github.tchx84.Flatseal
+          - io.gitlab.librewolf-community
+          - org.gnome.Calculator
+          - org.gnome.Evince
+          - org.gnome.Loupe
+          - org.gnome.Nautilus
+          - org.gnome.seahorse.Application
+      - scope: user # Also add Flathub user repo, but no user packages
+        install:
+          - com.bitwarden.desktop
+          - com.discordapp.Discord
+          - com.heroicgameslauncher.hgl
+          - com.moonlight_stream.Moonlight
+          - com.parsecgaming.parsec
+          - com.spotify.Client
+          - com.valvesoftware.Steam
+          - eu.betterbird.Betterbird
+          - io.ente.auth
+          - io.github.thetumultuousunicornofdarkness.cpu-x
+          - org.remmina.Remmina
+
+  - type: signing
