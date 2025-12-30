@@ -1,0 +1,11 @@
+---
+# yaml-language-server: $schema=https://schema.blue-build.org/recipe-v1.json
+# image will be published to ghcr.io/ammunoz/moonos-niri
+name: moonos-niri
+description: (Niri) Personally official moonOS image.
+base-image: ghcr.io/wayblueorg/niri
+image-version: br-niritesting-42 # change to latest when the wayblue niritesting branch is merged to main
+
+modules:
+  - from-file: common.yml
+  - from-file: final.yml

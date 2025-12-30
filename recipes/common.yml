@@ -1,0 +1,39 @@
+modules:
+#  - type: files
+#    files:
+#      - source: system
+#        destination: / # copies files/system/* (* means everything inside it) into your image's root folder /
+
+# sway: akmods module only works for ubuild base images. There currently are no ublue images for sway atomic.
+# niri: These should already be installed in the base wayblue image.
+#  - type: akmods
+#    base: main
+#    install:
+#      - openrazer
+#      - v4l2loopback
+#      - xone
+
+  - type: dnf
+    repos:
+      copr:
+        - dwmw2/openconnect
+        - sentry/xone
+    replace:
+      - from-repo: copr:copr.fedorainfracloud.org:dwmw2:openconnect
+        packages:
+          - openconnect
+    remove:
+      packages:
+        - firefox
+        - firefox-langpacks # also remove firefox dependency (not required for all packages, this is a special case)
+        - sway
+        - Thunar
+        - thunar-archive-plugin
+    install:
+      packages:
+        - distrobox
+        - git
+        - htop
+        - libsecret
+        - steam-devices
+        - stow
