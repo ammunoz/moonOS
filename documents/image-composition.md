@@ -9,15 +9,19 @@ image and where those packages come from.
 | Repository | Used for |
 |---|---|
 | Fedora 44 | everything not listed below |
-| [Terra](https://wiki.fyralabs.com/Terra) | `noctalia`, `umbriel-nightly`, `noctalia-greeter`, `xdg-desktop-portal-umbriel-nightly` |
+| [Terra](https://wiki.fyralabs.com/Terra) | `umbriel-nightly`, `noctalia-greeter`, `xdg-desktop-portal-umbriel-nightly` |
 | [Tailscale](https://pkgs.tailscale.com/stable/fedora/) | `tailscale`, which runs a few releases ahead of Fedora's |
 | [Universal Blue](https://github.com/ublue-os/akmods) | the prebuilt kernel modules |
-| Flathub | the system Flatpaks |
+| Flathub | the system and user Flatpaks |
 
 Terra is added by the `dnf` module from `files/dnf/terra-44.repo`. Its file
 name carries the Fedora release, so the recipe refers to it as
 `terra-%OS_VERSION%.repo` — bumping `image-version` in the recipe means
 renaming that file too, and the build fails loudly until you do.
+
+The Noctalia shell itself is in Fedora as well, and Fedora's build is the
+newer one (`5.3.0` against Terra's `5.0.0~beta.9`), so that is the one dnf
+picks. Terra is only needed for the compositor, the greeter and the portal.
 
 Tailscale's repository is added from `files/dnf/tailscale.repo`, a copy of
 Tailscale's own with `skip_if_unavailable` set, so an outage there falls back

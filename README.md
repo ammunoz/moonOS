@@ -18,12 +18,27 @@ The image is published to `ghcr.io/ammunoz/moonos`.
 | Terminal | `foot` |
 | Editor | `micro` — the default editor, also aliased as `nano` and `rnano` |
 | Kernel modules | `xone`, `xpadneo`, `v4l2loopback`, `openrazer`, `wl` |
-| Flatpaks | `io.gitlab.librewolf-community`, `org.gnome.Loupe`, `com.valvesoftware.Steam` (system scope) |
+| Fonts | Cantarell, Noto Sans/Serif/Mono, Noto Color Emoji, plus Inter and JetBrains Mono (a Nerd Font) |
+| Desktop extras | `file-roller` (archives), `pavucontrol` (audio mixer), `seahorse` (Passwords and Keys), `ddcutil` (external monitor brightness) |
+| Flatpaks (system) | Flatseal, Calculator, Document Viewer, Image Viewer, Music |
+| Flatpaks (user) | Betterbird, Bitwarden, Discord, Heroic, Krita, LibreOffice, LibreWolf, mpv, OBS Studio, Spotify, Steam, Zoom |
 | Replaced | `nano` and `vim` with `micro`; `firefox` with the LibreWolf Flatpak |
 
 `EDITOR`, `VISUAL` and `GIT_EDITOR` are set to `micro` for both systemd
 sessions and login shells. There is no `vi` on this image, so anything that
 shells out to an editor needs one of those three variables set.
+
+## Flatpak scopes
+
+Flatpaks are installed in two passes:
+
+| Scope | When |
+|---|---|
+| system | during boot, once, for every user |
+| user | on the **first login** of each user |
+
+The browser (LibreWolf), Steam, OBS Studio, Discord and the rest are user
+scope, so they arrive after you log in the first time — not at first boot.
 
 ## Kernel modules
 
@@ -121,11 +136,28 @@ file from this repository:
 cosign verify --key cosign.pub ghcr.io/ammunoz/moonos:latest
 ```
 
+## Passwords and the keyring
+
+The shell stores the encryption key for its clipboard history and calendar
+cache in the desktop Secret Service, which `gnome-keyring` provides. Password
+quality for local accounts is already enforced by `pam_pwquality`.
+
+**Check this on the first login.** Open *Passwords and Keys* (`seahorse`) and
+make sure the **Login** keyring is the default:
+
+- If a different keyring is the default, the shell cannot read its clipboard
+  history or calendar credentials until a second login unlocks it.
+- The symptom is subtle — the clipboard panel is empty after every reboot, and
+  the calendar never appears.
+
 ## Configuration on the image
 
 | What | Where |
 |---|---|
 | Umbriel compositor | `/usr/etc/xdg/umbriel/config.toml` — system-wide default, users can override it in `~/.config/umbriel/config.toml` |
+| Shell defaults | `/etc/skel/.config/noctalia/00-moonos.toml` — copied into every new account, and overridden by the user's own config |
+| Noctalia shell | `~/.config/noctalia/config.toml` — the shell reads every `*.toml` in that directory |
+| Noctalia state | `~/.local/state/noctalia/settings.toml` — written by the settings UI, do not edit by hand |
 | Wi-Fi backend | `/etc/NetworkManager/conf.d/99-wifi-backend.conf` — written at boot by `moonos-wifi-backend.service` |
 | Greeter account | `greeter`, created by `systemd-sysusers` on every boot |
 | Editor variables | `/usr/lib/environment.d/90-micro-editor.conf` and `/etc/profile.d/micro.sh` |
@@ -136,6 +168,9 @@ the machine is an Intel one, `wpa_supplicant` otherwise. Both are installed.
 
 ## Known limitations
 
+- **No file manager yet.** A separate effort is in progress. Until then, use
+  the file chooser in any app, or `foot` and `micro`.
+- **User-scope Flatpaks arrive on the first login**, not at first boot.
 - **No NVIDIA driver.** The image ships the standard Mesa stack only.
 - **No `nct6687d`.** Universal Blue builds that module in their `extra`
   bundle, which is not published for Fedora's mainline kernel, and Fedora

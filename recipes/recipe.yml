@@ -31,9 +31,10 @@ modules:
     repos:
       files:
         add:
-          # Terra ships the Noctalia shell, the Umbriel compositor and the
-          # Noctalia greeter. It is not part of Fedora. The file name carries
-          # the Fedora release, so %OS_VERSION% has to match image-version.
+          # Terra ships the Umbriel compositor and the Noctalia greeter. The
+          # Noctalia shell itself is in Fedora too, and Fedora's build is the
+          # newer one, so that is the one dnf picks. The file name carries the
+          # Fedora release, so %OS_VERSION% has to match image-version.
           - terra-%OS_VERSION%.repo
           # Tailscale's own repository. It carries newer releases than
           # Fedora does, and skips itself when it cannot be reached.
@@ -73,13 +74,34 @@ modules:
         - htop
         - distrobox
         - tailscale
+        # FUSE 3 for AppImages. The base image already pulls this in
+        # transitively, it is listed so that the image does not depend on that.
+        - fuse3
         # daemon for the openrazer kernel module installed by the akmods module
         - openrazer-daemon
         # enrols the kernel module signing key in the MOK on SecureBoot systems
         - mokutil
+        # desktop utilities the Noctalia shell does not provide
+        # file-roller is the archive manager, 7zip gives it 7z support
+        - file-roller
+        - 7zip
+        # mixer for per-application routing and device selection; the shell only
+        # controls the master output and the microphone volume
+        - pavucontrol
+        # the shell's power-profile widget talks to org.freedesktop.UPower.
+        # PowerProfiles, which this daemon provides
+        - power-profiles-daemon
+        # Passwords and Keys; the Secret Service provider the shell stores its
+        # clipboard and calendar keys in. Not available as a Flatpak.
+        - seahorse
+        # DDC/CI brightness for external monitors. The shell recommends this
+        # and uses it when [brightness] enable_ddcutil is turned on.
+        - ddcutil
+        # JSON processor
+        - jq
     remove:
       packages:
-        # the browser ships as a flatpak instead
+        # the browser ships as a user flatpak instead
         - firefox
         - firefox-langpacks
 
@@ -124,16 +146,45 @@ modules:
         - moonos-wifi-backend.service
         - moonos-greeter-setup.service
         - moonos-akmods-key.service
+        - power-profiles-daemon.service
+
+  # Fonts. The base image already ships the default font set, these two are
+  # for the shell: JetBrains Mono is a Nerd Font and carries the symbol
+  # glyphs, Inter is the family the shell suggests in its font setting.
+  - type: fonts
+    fonts:
+      nerd-fonts:
+        - JetBrainsMono
+      google-fonts:
+        - Inter
 
   - type: default-flatpaks
     configurations:
       - notify: true # Send notification after install/uninstall is finished (true/false)
         scope: system
-        # If no repo information is specified, Flathub will be used by default
+        repo:
+          title: Flathub (system)
         install: # system flatpaks we want all users to have and not remove
-          - io.gitlab.librewolf-community
+          - com.github.tchx84.Flatseal
+          - org.gnome.Calculator
+          - org.gnome.Evince
           - org.gnome.Loupe
+          - org.gnome.Music
+      - scope: user # user flatpaks, installed for each user on their first login
+        repo:
+          title: Flathub (user)
+        install:
+          - com.bitwarden.desktop
+          - com.discordapp.Discord
+          - com.heroicgameslauncher.hgl
+          - com.obsproject.Studio
+          - com.spotify.Client
           - com.valvesoftware.Steam
-      - scope: user # Also add Flathub user repo, but no user packages
+          - eu.betterbird.Betterbird
+          - io.gitlab.librewolf-community
+          - io.mpv.Mpv
+          - org.kde.krita
+          - org.libreoffice.LibreOffice
+          - us.zoom.Zoom
 
   - type: signing # this sets up the proper policy & signing files for signed images to work fully

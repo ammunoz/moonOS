@@ -1,0 +1,15 @@
+# moonOS defaults for new accounts.
+#
+# Noctalia reads every *.toml file in ~/.config/noctalia/, sorts them
+# alphabetically and merges them into one configuration. This file sorts
+# before config.toml, so anything the user writes in their own file wins.
+# In other words: these are defaults, not overrides.
+#
+# The file is copied from /etc/skel when an account is created, both by the
+# installer and by the first-boot wizard.
+
+# DDC/CI brightness for external monitors. The shell drives laptop panels
+# through the kernel backlight interface and only needs this for monitors
+# that do not expose one.
+[brightness]
+enable_ddcutil = true

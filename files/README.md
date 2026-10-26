@@ -11,6 +11,10 @@ files/
 │   ├── etc/
 │   │   ├── profile.d/
 │   │   │   └── micro.sh
+│   │   ├── skel/
+│   │   │   └── .config/
+│   │   │       └── noctalia/
+│   │   │           └── 00-moonos.toml
 │   │   └── xdg/
 │   │       └── umbriel/
 │   │           └── config.toml
@@ -62,6 +66,7 @@ Two things to know:
 | File | Purpose |
 |---|---|
 | `etc/profile.d/micro.sh` | sets `EDITOR`/`VISUAL`/`GIT_EDITOR` to `micro` for login shells |
+| `etc/skel/.config/noctalia/00-moonos.toml` | Noctalia defaults copied into every new account: DDC/CI brightness for external monitors |
 | `etc/xdg/umbriel/config.toml` | system-wide Umbriel configuration: starts Noctalia, appearance, `foot` on `Mod+Return` |
 | `usr/lib/environment.d/90-micro-editor.conf` | sets `EDITOR`/`VISUAL`/`GIT_EDITOR` to `micro` for systemd services and user sessions |
 | `usr/lib/sysusers.d/noctalia-greeter.conf` | creates the `greeter` account the Noctalia greeter runs as |
