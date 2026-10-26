@@ -1,0 +1,16 @@
+# Tailscale's own repository.
+#
+# This is a copy of
+# https://pkgs.tailscale.com/stable/fedora/tailscale.repo with
+# skip_if_unavailable added: if Tailscale's servers cannot be reached, dnf
+# warns and falls back to the copy in Fedora instead of failing the image
+# build.
+[tailscale-stable]
+name=Tailscale stable
+baseurl=https://pkgs.tailscale.com/stable/fedora/$basearch
+enabled=1
+type=rpm
+repo_gpgcheck=1
+gpgcheck=1
+skip_if_unavailable=True
+gpgkey=https://pkgs.tailscale.com/stable/fedora/repo.gpg

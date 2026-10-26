@@ -1,0 +1,46 @@
+#!/bin/sh
+#
+# Enrol the signing key of the prebuilt kernel modules in the MOK.
+#
+# The kernel modules that moonOS ships are signed by Universal Blue's key. A
+# Secure Boot system has to trust that key before the kernel will load the
+# modules. Enrolling a key means writing to the firmware's Secure Boot
+# variables, which can only be confirmed from the firmware itself, so this
+# stages the key with mokutil and the user accepts it in the MOK Manager at
+# the next boot.
+#
+# Running this by hand does the same thing:
+#
+#   sudo /usr/libexec/moonos/enroll-akmods-key
+
+set -eu
+
+CERT="/etc/pki/akmods/certs/akmods-ublue.der"
+
+if [ ! -f "${CERT}" ]; then
+	echo "No akmods signing certificate at ${CERT}, nothing to enrol." >&2
+	exit 0
+fi
+
+if ! command -v mokutil >/dev/null 2>&1; then
+	echo "mokutil is not installed, cannot enrol the akmods signing key." >&2
+	exit 0
+fi
+
+if [ "$(mokutil --sb-state 2>/dev/null || echo disabled)" != "enabled" ]; then
+	# Not a Secure Boot system, the modules load without a MOK.
+	exit 0
+fi
+
+if mokutil --test-key "${CERT}" >/dev/null 2>&1; then
+	# Already enrolled.
+	exit 0
+fi
+
+if mokutil --import "${CERT}"; then
+	echo "The akmods signing key has been staged for enrolment."
+	echo "Reboot and choose 'Enroll MOK' in the MOK Manager to finish."
+	echo "Until then the kernel modules will not load."
+fi
+
+exit 0

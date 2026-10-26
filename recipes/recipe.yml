@@ -20,14 +20,19 @@ modules:
           # Noctalia greeter. It is not part of Fedora. The file name carries
           # the Fedora release, so %OS_VERSION% has to match image-version.
           - terra-%OS_VERSION%.repo
+          # Tailscale's own repository. It carries newer releases than
+          # Fedora does, and skips itself when it cannot be reached.
+          - tailscale.repo
       keys:
         - https://repos.fyralabs.com/terra%OS_VERSION%/key.asc
+        - https://pkgs.tailscale.com/stable/fedora/repo.gpg
     install:
       packages:
         # terminal
         - foot
         # micro is the only editor on this image
         - micro
+        - micro-default-editor
         # compositor, desktop shell and login screen
         - umbriel-nightly
         - noctalia
@@ -53,16 +58,21 @@ modules:
         - htop
         - distrobox
         - tailscale
+        # daemon for the openrazer kernel module installed by the akmods module
+        - openrazer-daemon
+        # enrols the kernel module signing key in the MOK on SecureBoot systems
+        - mokutil
     remove:
       packages:
         # the browser ships as a flatpak instead
         - firefox
         - firefox-langpacks
 
-        # micro is the only editor: drop nano, vi and the alternatives
+        # micro is the only editor: drop nano, vi and the alternatives.
+        # default-editor stays: micro-default-editor needs it, and it is
+        # what provides the system-default-editor virtual provide.
         - nano
         - nano-default-editor
-        - default-editor
         - vim
         - vim-enhanced
         - vim-minimal
@@ -70,6 +80,14 @@ modules:
         - vim-data
         - vim-filesystem
         - vim-default-editor
+
+  # Kernel modules. The akmods module type makes BlueBuild stage Universal
+  # Blue's prebuilt module bundle for the kernel of our base image, and
+  # "source: local" makes it run modules/akmods/akmods.sh instead of the
+  # built-in script.
+  - type: akmods
+    source: local
+    base: main
 
   - type: files
     files:
@@ -88,6 +106,8 @@ modules:
       - grep -qE '^[[:space:]]*session[[:space:]]+required[[:space:]]+pam_systemd\.so' /etc/pam.d/greetd || printf 'session required pam_systemd.so\n' >> /etc/pam.d/greetd
       # the wifi backend detection script has to be executable
       - chmod 0755 /usr/libexec/moonos/select-wifi-backend
+      # the MOK enrolment helper is run by systemd as root
+      - chmod 0755 /usr/libexec/moonos/enroll-akmods-key
 
   - type: systemd
     system:
@@ -96,6 +116,7 @@ modules:
         - initial-setup.service
         - moonos-wifi-backend.service
         - moonos-greeter-setup.service
+        - moonos-akmods-key.service
 
   - type: default-flatpaks
     configurations:

@@ -51,6 +51,13 @@ jobs:
           # !! Add your recipes here
           - recipe.yml
     steps:
+      # the kernel modules moonOS ships are prebuilt for one exact kernel.
+      # If the base image has moved on, Universal Blue has not rebuilt the
+      # bundle yet and the modules cannot be installed, so stop here rather
+      # than publish an image that is missing them.
+      - name: Check the kernel matches the akmods bundle
+        run: python3 .forgejo/scripts/check-akmods-kernel.py
+
       # the build is fully handled by the reusable github action
       - name: Build Custom Image
         uses: https://github.com/blue-build/github-action@c295af864f2802fc6aea227507af43d35823db81 # v1.13

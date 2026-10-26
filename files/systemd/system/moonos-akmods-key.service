@@ -1,0 +1,14 @@
+[Unit]
+Description=Enrol the kernel module signing key in the MOK
+Documentation=man:mokutil(8)
+After=systemd-udev-settle.service
+ConditionPathExists=/sys/firmware/efi/efivars
+ConditionPathExists=/usr/bin/mokutil
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/libexec/moonos/enroll-akmods-key
+
+[Install]
+WantedBy=multi-user.target
