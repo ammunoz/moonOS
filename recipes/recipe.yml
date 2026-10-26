@@ -12,6 +12,21 @@ image-version: 44
 
 # module configuration, executed in order
 modules:
+  # Kernel modules. The akmods module type makes BlueBuild stage Universal
+  # Blue's prebuilt module bundle for the kernel of our base image, and
+  # "source: local" makes it run modules/akmods/akmods.sh instead of the
+  # built-in script.
+  #
+  # This has to run before the dnf module. openrazer-daemon pulls in the
+  # openrazer package, which needs something to provide openrazer-kmod.
+  # Until the bundle is installed, the only provider is Terra's
+  # akmod-openrazer, whose install script tries to compile the module and
+  # fails as root. With the prebuilt module in place, dnf finds the
+  # provider it needs and never pulls in the akmod package.
+  - type: akmods
+    source: local
+    base: main
+
   - type: dnf
     repos:
       files:
@@ -80,14 +95,6 @@ modules:
         - vim-data
         - vim-filesystem
         - vim-default-editor
-
-  # Kernel modules. The akmods module type makes BlueBuild stage Universal
-  # Blue's prebuilt module bundle for the kernel of our base image, and
-  # "source: local" makes it run modules/akmods/akmods.sh instead of the
-  # built-in script.
-  - type: akmods
-    source: local
-    base: main
 
   - type: files
     files:

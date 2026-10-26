@@ -37,6 +37,31 @@ The addons package is not installed. The certificate is taken out of it
 instead, with `rpm2cpio` and `cpio`, and lands at
 `/etc/pki/akmods/certs/akmods-ublue.der`.
 
+## Why the bundle goes in first
+
+The `akmods` module runs **before** the `dnf` module in the recipe, and that
+order matters.
+
+`openrazer-daemon` depends on the `openrazer` package, which in turn needs
+something to provide the virtual `openrazer-kmod`. Two packages provide it:
+
+- `kmod-openrazer` — the prebuilt module from the bundle, which is what
+  moonOS ships
+- `akmod-openrazer` — the source package from Terra, whose install script
+  compiles the module on the spot and refuses to run as root
+
+Until the bundle is installed, dnf can only see the second one, pulls it in,
+and the transaction dies with:
+
+```
+Building /usr/src/akmods/openrazer-kmod-3.12.4-2.fc44.src.rpm for kernel 7.2.11-200.fc44.x86_64
+ERROR: Not to be used as root; start as user or 'akmodsbuild' instead.
+```
+
+Installing the prebuilt module first means dnf finds the provider it needs
+among the installed packages and never pulls in the akmod package. Moving
+the `akmods` module back below the `dnf` module brings that failure back.
+
 ## The kernel-match check
 
 The bundle is built for one kernel at a time. Two guards keep the image from
