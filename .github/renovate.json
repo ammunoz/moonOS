@@ -3,12 +3,5 @@
   "extends": [
     "config:base"
   ],
-  "packageRules": [
-    {
-      "matchPackageNames": ["*"],
-      "enabled": true,
-      "directory": "/"
-    }
-  ],
-  "schedule": ["every day"]
+  "schedule": ["* 3-5 * * *"]
 }

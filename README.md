@@ -62,6 +62,10 @@ the modules load straight away and none of this is needed.
 
 There are two supported ways to get moonOS onto a machine.
 
+> The image used to be published to `git.ajiky.com/iky/moonos`. That
+> registry is gone, so a rebase pointing at it has to be pointed at
+> `ghcr.io/ammunoz/moonos` instead.
+
 ### 1. Rebase an existing Atomic Fedora installation
 
 This is the quickest path if you already run Fedora Atomic. The user account
