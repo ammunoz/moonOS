@@ -53,6 +53,10 @@ jobs:
       packages: write
       # no id-token: write - the image is signed with the cosign key pair in
       # secrets.SIGNING_SECRET, so the keyless/OIDC path is never used
+    env:
+      # the registry login writes the token to the docker config, so keep
+      # that out of $HOME and in a directory the runner throws away
+      DOCKER_CONFIG: /tmp/docker-config
     strategy:
       fail-fast: false # stop GH from cancelling all matrix builds if one fails
       matrix:
