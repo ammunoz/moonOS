@@ -5,8 +5,7 @@ A custom **Fedora Atomic** desktop image built with
 desktop shell running on the [Umbriel](https://github.com/noctalia-dev/umbriel)
 Wayland compositor, with the Noctalia greeter as the login screen.
 
-The image is published to this Forgejo instance's container registry at
-`git.ajiky.com/iky/moonos`.
+The image is published to `ghcr.io/ammunoz/moonos`.
 
 ## What's in it
 
@@ -17,13 +16,10 @@ The image is published to this Forgejo instance's container registry at
 | Compositor | `umbriel-nightly` — Umbriel Wayland compositor |
 | Login | `greetd` + `noctalia-greeter` |
 | Terminal | `foot` |
-| Editor | `micro`, with `micro-default-editor` claiming `system-default-editor` (also aliased as `nano` and `rnano`) |
+| Editor | `micro` — the default editor, also aliased as `nano` and `rnano` |
 | Kernel modules | `xone`, `xpadneo`, `v4l2loopback`, `openrazer`, `wl` |
-| First boot | `initial-setup` creates the user account |
 | Flatpaks | `io.gitlab.librewolf-community`, `org.gnome.Loupe`, `com.valvesoftware.Steam` (system scope) |
-| Removed | `firefox` and `firefox-langpacks` RPMs, in favour of the LibreWolf Flatpak |
-| Removed | `nano`, `nano-default-editor` and all `vim-*` packages |
-| Signing | cosign key pair, verified on rebase |
+| Replaced | `nano` and `vim` with `micro`; `firefox` with the LibreWolf Flatpak |
 
 `EDITOR`, `VISUAL` and `GIT_EDITOR` are set to `micro` for both systemd
 sessions and login shells. There is no `vi` on this image, so anything that
@@ -74,13 +70,13 @@ configured and does nothing.
 
 ```bash
 # first rebase to the unsigned image, to get the proper signing keys and policies installed
-rpm-ostree rebase ostree-unverified-registry:git.ajiky.com/iky/moonos:latest
+rpm-ostree rebase ostree-unverified-registry:ghcr.io/ammunoz/moonos:latest
 systemctl reboot
 ```
 
 ```bash
 # then rebase to the signed image
-rpm-ostree rebase ostree-image-signed:docker://git.ajiky.com/iky/moonos:latest
+rpm-ostree rebase ostree-image-signed:docker://ghcr.io/ammunoz/moonos:latest
 systemctl reboot
 ```
 
@@ -103,11 +99,6 @@ projects something else has to be used for hosting.
 Anaconda creates the user account during the installation, so `initial-setup`
 has nothing left to do on the first boot.
 
-> **Private registry caveat:** the installer pulls the container image from
-> `git.ajiky.com` at install time, and that registry needs authentication.
-> Until the image is published somewhere public, use the rebase path above or
-> provide the registry credentials to the installer.
-
 ### First boot on a bare machine
 
 Installing the container onto a machine without an account (`rpm-ostree
@@ -123,7 +114,7 @@ Images are signed with [Sigstore](https://www.sigstore.dev/)'s
 file from this repository:
 
 ```bash
-cosign verify --key cosign.pub git.ajiky.com/iky/moonos:latest
+cosign verify --key cosign.pub ghcr.io/ammunoz/moonos:latest
 ```
 
 ## Configuration on the image
@@ -150,7 +141,7 @@ the machine is an Intel one, `wpa_supplicant` otherwise. Both are installed.
   kernel at a time, so they are tied to the base image's kernel. A rebase
   brings the matching modules with it, but a kernel that moved on before
   Universal Blue rebuilt the bundle leaves the image without them until the
-  next build.
+  next build, which is at most a day away.
 - **Umbriel is nightly-only.** Expect compositor behaviour to change between
   builds.
 

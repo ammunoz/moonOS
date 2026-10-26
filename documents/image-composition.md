@@ -33,7 +33,8 @@ recipes/recipe.yml   the image definition — this is the main source of truth
 files/               build-time file drops and scripts
 modules/akmods/      the kernel module installer, a local BlueBuild module
 documents/           the contributor documentation
-.forgejo/            CI workflow, Renovate config and helper scripts
+.github/             CI workflow and Renovate config
+scripts/             CI helper scripts
 cosign.pub           the public half of the image signing key
 CODEOWNERS           repository owners
 ```

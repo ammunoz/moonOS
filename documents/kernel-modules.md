@@ -42,7 +42,7 @@ instead, with `rpm2cpio` and `cpio`, and lands at
 The bundle is built for one kernel at a time. Two guards keep the image from
 being published without its modules:
 
-**Before the build** — [`.forgejo/scripts/check-akmods-kernel.py`](../.forgejo/scripts/check-akmods-kernel.py)
+**Before the build** — [`scripts/check-akmods-kernel.py`](../scripts/check-akmods-kernel.py)
 reads the `ostree.linux` label of the base image and of Universal Blue's
 bundle and compares the two. When they differ the build stops rather than
 publishing an image whose kernel modules cannot be installed. The bundle is
@@ -50,7 +50,7 @@ rebuilt daily, so the next run picks the new one up. The check can be run by
 hand at any time:
 
 ```bash
-python3 .forgejo/scripts/check-akmods-kernel.py
+python3 scripts/check-akmods-kernel.py
 ```
 
 **During the install** — `akmods.sh` compares the `kernel-uname-r`

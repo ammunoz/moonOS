@@ -32,7 +32,7 @@ TOKEN_ENDPOINTS = {
     "quay.io": "https://quay.io/v2/auth?service=quay.io&scope=repository:{repo}:pull",
 }
 
-ROOT = pathlib.Path(__file__).resolve().parents[2]
+ROOT = pathlib.Path(__file__).resolve().parents[1]
 RECIPE = ROOT / "recipes" / "recipe.yml"
 
 AKMODS_REPOSITORY = "ghcr.io/ublue-os/akmods"

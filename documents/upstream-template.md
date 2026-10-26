@@ -6,8 +6,8 @@ template changes rarely, and it explicitly states that syncing is not required
 to keep the repository functional. The parts that do change are:
 
 - the `blue-build/github-action` version — tracked automatically by
-  [Renovate](../.forgejo/renovate.json), which understands the SHA-pinned
-  `uses:` reference in [`.forgejo/workflows/build.yml`](../.forgejo/workflows/build.yml)
+  [Renovate](../.github/renovate.json), which understands the SHA-pinned
+  `uses:` reference in [`.github/workflows/build.yml`](../.github/workflows/build.yml)
 - `recipes/recipe.yml` and `README.md` defaults — applied by hand
 - `.gitignore` — applied by hand
 
