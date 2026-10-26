@@ -29,36 +29,10 @@ The image is published to this Forgejo instance's container registry at
 sessions and login shells. There is no `vi` on this image, so anything that
 shells out to an editor needs one of those three variables set.
 
-### Where the packages come from
-
-| Repository | Used for |
-|---|---|
-| Fedora 44 | everything not listed below |
-| [Terra](https://wiki.fyralabs.com/Terra) | `noctalia`, `umbriel-nightly`, `noctalia-greeter`, `xdg-desktop-portal-umbriel-nightly` |
-| [Tailscale](https://pkgs.tailscale.com/stable/fedora/) | `tailscale`, which runs a few releases ahead of Fedora's |
-| [Universal Blue](https://github.com/ublue-os/akmods) | the prebuilt kernel modules |
-| Flathub | the system Flatpaks |
-
-Terra is added by the `dnf` module from `files/dnf/terra-44.repo`. Its file
-name carries the Fedora release, so the recipe refers to it as
-`terra-%OS_VERSION%.repo` — bumping `image-version` in the recipe means
-renaming that file too, and the build fails loudly until you do.
-
-Tailscale's repository is added from `files/dnf/tailscale.repo`, a copy of
-Tailscale's own with `skip_if_unavailable` set, so an outage there falls back
-to Fedora's copy instead of failing the build.
-
-Umbriel only exists as a nightly build (`umbriel-nightly`); there is no stable
-release yet, so it will churn between builds.
-
-### Kernel modules
+## Kernel modules
 
 The kernel modules are prebuilt by Universal Blue for the exact kernel of the
-base image, so the image needs neither a compiler nor `kernel-devel`. BlueBuild
-stages their bundle automatically for any module of type `akmods`; the recipe
-uses that module type with `source: local` so that
-[`modules/akmods/akmods.sh`](modules/akmods/akmods.sh) does the install with
-`dnf5` instead of the built-in script.
+base image, so the image needs neither a compiler nor `kernel-devel`.
 
 | Module | For |
 |---|---|
@@ -69,11 +43,10 @@ uses that module type with `source: local` so that
 | `wl` | Broadcom wireless cards |
 
 The bundle is built for one kernel at a time, so the build checks that the
-base image and the bundle agree before it starts — see
-[Building](#building). If they disagree the build stops rather than
-publishing an image that is missing its modules.
+base image and the bundle agree before it starts. If they disagree the build
+stops rather than publishing an image that is missing its modules.
 
-#### Secure Boot
+### Secure Boot
 
 The modules are signed with Universal Blue's key, which a Secure Boot system
 has to trust before the kernel will load them. moonOS ships the certificate
@@ -88,65 +61,6 @@ That writes the key into the machine's MOK. **Reboot and choose "Enroll MOK"
 in the MOK Manager** — that last step happens in the firmware, before the
 kernel starts, so it cannot be done for you. On a system without Secure Boot
 the modules load straight away and none of this is needed.
-
-## Layout
-
-```
-recipes/recipe.yml   the image definition — this is the main source of truth
-files/               optional build-time file drops and scripts (see files/README.md)
-modules/akmods/      the kernel module installer, a local BlueBuild module
-.forgejo/scripts/    CI helper scripts
-cosign.pub           the public half of the image signing key
-CODEOWNERS           repository owners
-```
-
-## Required secrets
-
-Set these in the repository's **Settings → Secrets** on `git.ajiky.com`:
-
-| Secret | Value |
-|---|---|
-| `SIGNING_SECRET` | the cosign **private** key (PEM). Must match the committed `cosign.pub`. |
-| `REGISTRY_TOKEN` | a Forgejo personal access token with the `write:package` scope, used to push to `git.ajiky.com`. |
-
-The private key is never committed — `.gitignore` excludes `cosign.key` and
-`cosign.private`.
-
-## Building
-
-Pushes to `main`, pull requests, and a daily schedule at 06:00 UTC all trigger
-a build. Every run first validates `recipes/recipe.yml` against the published
-JSON schema, then checks that the base image and the kernel-module bundle are
-built for the same kernel, then builds and pushes the image.
-
-The kernel check is [`.forgejo/scripts/check-akmods-kernel.py`](.forgejo/scripts/check-akmods-kernel.py).
-It reads the `ostree.linux` label of the base image and of Universal Blue's
-bundle and compares the two. When they differ the build stops with an error
-rather than publishing an image whose kernel modules cannot be installed —
-the bundle is rebuilt daily, so the next run picks the new one up. You can run
-the check yourself at any time:
-
-```bash
-python3 .forgejo/scripts/check-akmods-kernel.py
-```
-
-The image is pushed with these tags, where `<fedora>` is the Fedora version of
-the base image the build used (currently `44`):
-
-- `latest` — the most recent build from the default branch
-- `<fedora>` — e.g. `44`
-- `<timestamp>` and `<timestamp>-<fedora>`
-- `<short-sha>-<fedora>`
-
-### Building locally
-
-```bash
-bluebuild build -v recipes/recipe.yml
-```
-
-See the [BlueBuild local build guide](https://blue-build.org/how-to/local/).
-A local build does not push; add `--push` plus `--registry`/`--username`/
-`--password` to publish.
 
 ## Installing
 
@@ -170,9 +84,14 @@ rpm-ostree rebase ostree-image-signed:docker://git.ajiky.com/iky/moonos:latest
 systemctl reboot
 ```
 
-The `latest` tag will automatically point to the latest build. That build will
-still always use the Fedora version specified in `recipe.yml`, so you won't get
-accidentally updated to the next major version.
+The `latest` tag automatically points at the most recent build from the
+default branch. That build will still always use the Fedora version specified
+in `recipe.yml`, so you won't get accidentally updated to the next major
+version.
+
+Those builds are also published under their Fedora version (`:44` for the
+current one), so you can pin to that instead of `latest` if you want to stay on
+a specific release.
 
 ### 2. Install from an ISO
 
@@ -235,37 +154,13 @@ the machine is an Intel one, `wpa_supplicant` otherwise. Both are installed.
 - **Umbriel is nightly-only.** Expect compositor behaviour to change between
   builds.
 
-## Customising
+## Development
 
-Edit `recipes/recipe.yml` — it is validated on every pull request, so mistakes
-are caught before a build starts.
+This README is for people using moonOS. If you want to change it, the
+contributor documentation lives in [`documents/`](documents/):
 
-- **Packages**: add to the `dnf` module's `install.packages` list. Anything in
-  Fedora's repositories works without extra configuration. Third-party repos go
-  under `repos.files` and `repos.keys`.
-- **Files and scripts**: see [`files/README.md`](files/README.md).
-- **Base image**: `image-version` accepts `latest` or a Fedora major version
-  (e.g. `44`). Pinning a major version freezes your base, but note that the
-  pinned tag is removed from the base image when that release ages out, so
-  a stale pin will eventually break the build.
-
-## Staying current with the template
-
-This repository started as a fork of
-[blue-build/template](https://github.com/blue-build/template/). The upstream
-template changes rarely, and it explicitly states that syncing is not required
-to keep the repository functional. The parts that do change are:
-
-- the `blue-build/github-action` version — tracked automatically by
-  [Renovate](.forgejo/renovate.json), which understands the SHA-pinned
-  `uses:` reference in [`.forgejo/workflows/build.yml`](.forgejo/workflows/build.yml)
-- `recipes/recipe.yml` and `README.md` defaults — applied by hand
-- `.gitignore` — applied by hand
-
-To see what upstream has changed:
-
-```bash
-git remote add template https://github.com/blue-build/template.git
-git fetch template
-git diff main template/main
-```
+- [image-composition.md](documents/image-composition.md) — what goes into the image and where it comes from
+- [kernel-modules.md](documents/kernel-modules.md) — the prebuilt kernel modules
+- [building.md](documents/building.md) — CI, secrets, published tags, local builds
+- [customising.md](documents/customising.md) — changing the image
+- [upstream-template.md](documents/upstream-template.md) — syncing with the upstream BlueBuild template
