@@ -15,13 +15,35 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
   cancel-in-progress: true
 jobs:
+  lint:
+    name: Validate Recipe
+    runs-on: self-hosted
+    # the nightly build does not need to re-validate the recipe
+    if: github.event_name != 'schedule'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install BlueBuild
+        run: |
+          sudo docker rm -f bluebuild-installer 2>/dev/null || true
+          sudo docker create --name bluebuild-installer ghcr.io/blue-build/cli:v0.9-installer
+          sudo docker cp bluebuild-installer:/out/bluebuild /usr/local/bin/bluebuild
+          sudo docker rm bluebuild-installer
+
+      # validates the recipe against the published JSON schema, including
+      # any from-file: module references
+      - name: Validate recipe
+        run: bluebuild validate recipes/recipe.yml
+
   bluebuild:
     name: Build Custom Image
     runs-on: self-hosted
     permissions:
       contents: read
       packages: write
-      id-token: write
+      # no id-token: write - the image is signed with the cosign key pair in
+      # secrets.SIGNING_SECRET, so the keyless/OIDC path is never used
     strategy:
       fail-fast: false # stop GH from cancelling all matrix builds if one fails
       matrix:
@@ -31,12 +53,21 @@ jobs:
     steps:
       # the build is fully handled by the reusable github action
       - name: Build Custom Image
-        uses: https://github.com/blue-build/github-action@v1.10
+        uses: https://github.com/blue-build/github-action@c295af864f2802fc6aea227507af43d35823db81 # v1.13
         with:
           recipe: ${{ matrix.recipe }}
           cosign_private_key: ${{ secrets.SIGNING_SECRET }}
-          registry_token: ${{ github.token }}
+          # publish to this Forgejo instance's container registry
+          registry: git.ajiky.com
+          registry_namespace: iky
+          registry_username: iky
+          registry_token: ${{ secrets.REGISTRY_TOKEN }}
           pr_event_number: ${{ github.event.number }}
 
-          # enabled by default, disable if your image is small and you want faster builds
-          maximize_build_space: true
+          # pin the CLI version, otherwise the action queries api.github.com
+          # with the Forgejo token, which GitHub rejects with a 401
+          cli_version: v0.9
+
+          # disabled: on a self-hosted runner this wipes host swap and any
+          # GitHub runner tool caches to free disk space
+          maximize_build_space: false

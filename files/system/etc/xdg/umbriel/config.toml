@@ -1,0 +1,47 @@
+# moonOS system-wide Umbriel configuration.
+#
+# Umbriel looks for its configuration in this order and uses the first file it
+# finds:
+#
+#   1. $XDG_CONFIG_HOME/umbriel/config.toml   (~/.config/umbriel/config.toml)
+#   2. $XDG_CONFIG_DIRS/umbriel/config.toml   (normally /etc/xdg/...)
+#   3. /usr/share/umbriel/config.toml          (the packaged default)
+#
+# This file is the one from step 2, so it applies to every account on the
+# image. A per-user file from step 1 replaces it completely, so a user who
+# wants to keep these defaults should start their own config with:
+#
+#   [include]
+#   files = ["/usr/etc/xdg/umbriel/config.toml"]
+#
+# The packaged default is pulled in with an include, so only the differences
+# are stated here. Included files are applied first and this file last, and
+# tables merge by key, so the values below win over the packaged ones.
+
+[include]
+files = ["/usr/share/umbriel/config.toml"]
+
+# Start the Noctalia shell with the session.
+[general]
+autostart = ["noctalia"]
+
+# Appearance recommended by Noctalia for Umbriel: rounded windows, consistent
+# borders and a blurred desktop background.
+[appearance]
+prefer_no_csd = true
+border_width = 2
+corner_radius = 10
+
+[appearance.blur]
+enabled = true
+optimized = true
+passes = 2
+radius = 3
+noise = 0.02
+brightness = 0.9
+contrast = 0.9
+saturation = 1.1
+
+# The packaged configuration opens kitty on Mod+Return. moonOS ships foot.
+[keybinds]
+"Mod+Return" = { action = "spawn:foot", repeat = false }

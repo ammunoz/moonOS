@@ -1,0 +1,16 @@
+[Unit]
+Description=Initialise the Noctalia Greeter state
+Documentation=https://docs.noctalia.dev/noctalia-greeter/
+After=systemd-sysusers.service systemd-tmpfiles-setup.service multi-user.target
+Before=greetd.service
+ConditionPathExists=/usr/bin/noctalia-greeter-apply-appearance
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+# Creates greeter.toml and sync.toml in /var/lib/noctalia-greeter and hands
+# them to the greeter account.
+ExecStart=/usr/bin/noctalia-greeter-apply-appearance --setup-system
+
+[Install]
+WantedBy=multi-user.target

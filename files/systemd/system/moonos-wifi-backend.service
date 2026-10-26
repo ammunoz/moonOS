@@ -1,0 +1,13 @@
+[Unit]
+Description=Select the NetworkManager Wi-Fi backend for moonOS
+Documentation=man:NetworkManager.conf(5)
+Before=NetworkManager.service
+After=systemd-udev.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/libexec/moonos/select-wifi-backend
+
+[Install]
+WantedBy=sysinit.target

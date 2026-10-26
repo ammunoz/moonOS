@@ -1,0 +1,66 @@
+#!/bin/sh
+# Pick the NetworkManager Wi-Fi backend for this machine.
+#
+# Intel wireless cards are handled best by iwd, everything else works better
+# with wpa_supplicant, which is what NetworkManager uses by default. iwd is
+# only selected when *every* wireless device on the machine is an Intel one.
+#
+# Run by moonos-wifi-backend.service before NetworkManager starts, so the
+# decision is made once per boot and can be overridden by editing
+# /etc/NetworkManager/conf.d/99-wifi-backend.conf afterwards.
+set -eu
+
+CONF_DIR="/etc/NetworkManager/conf.d"
+CONF_FILE="${CONF_DIR}/99-wifi-backend.conf"
+
+# udev may still be probing the wireless hardware when this runs, so give it a
+# short while to show up before deciding that there is none.
+waited=0
+while [ "${waited}" -lt 20 ]; do
+	for net in /sys/class/net/*; do
+		if [ -e "${net}/wireless" ]; then
+			break 2
+		fi
+	done
+	sleep 0.5
+	waited=$((waited + 1))
+done
+
+found_wireless=0
+all_intel=1
+
+for net in /sys/class/net/*; do
+	[ -e "${net}/wireless" ] || continue
+	found_wireless=1
+
+	# The PCI vendor id of the device behind the network interface.
+	vendor=""
+	if [ -r "${net}/device/vendor" ]; then
+		vendor="$(cat "${net}/device/vendor")"
+	fi
+
+	# 0x8086 is Intel. Anything else keeps us on wpa_supplicant.
+	if [ "${vendor}" != "0x8086" ]; then
+		all_intel=0
+	fi
+done
+
+if [ "${found_wireless}" -eq 0 ]; then
+	# No wireless hardware, leave the NetworkManager default alone.
+	exit 0
+fi
+
+if [ "${all_intel}" -eq 1 ]; then
+	backend="iwd"
+else
+	backend="wpa_supplicant"
+fi
+
+mkdir -p "${CONF_DIR}"
+cat > "${CONF_FILE}" <<EOF
+# Written by moonos-wifi-backend.service.
+[connection]
+wifi.backend=${backend}
+EOF
+
+exit 0

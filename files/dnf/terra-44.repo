@@ -1,0 +1,15 @@
+# Terra — the repository that carries the Noctalia shell, the Umbriel
+# compositor and the Noctalia greeter for Fedora.
+#
+# The file name carries the Fedora release so that the BlueBuild `dnf` module
+# resolves it as `terra-%OS_VERSION%.repo`. If the image is moved to another
+# Fedora release, this file has to be renamed (and its URLs updated) as well,
+# and the build fails loudly until that happens.
+[terra]
+name=Terra 44
+baseurl=https://repos.fyralabs.com/terra44/
+gpgkey=https://repos.fyralabs.com/terra44/key.asc
+enabled=1
+gpgcheck=1
+repo_gpgcheck=0
+metadata_expire=6h

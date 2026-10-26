@@ -1,36 +1,101 @@
 ---
 # yaml-language-server: $schema=https://schema.blue-build.org/recipe-v1.json
-# image will be published to ghcr.io/<user>/<name>
-name: template
+# image will be published to <registry>/<namespace>/<name>
+name: moonos
 # description will be included in the image's metadata
-description: This is my personal OS image.
+description: moonOS - Noctalia Shell on the Umbriel compositor, a custom Fedora Atomic desktop.
 
-# the base image to build on top of (FROM) and the version tag to use
-base-image: ghcr.io/ublue-os/silverblue-main
-image-version: 42 # latest is also supported if you want new updates ASAP
+# the base image to build on top of (FROM) and the version tag to use.
+# Fedora 44 is the current GA release; 45 is still frozen upstream.
+base-image: ghcr.io/blue-build/base-images/fedora-base
+image-version: 44
 
 # module configuration, executed in order
-# you can include multiple instances of the same module
 modules:
+  - type: dnf
+    repos:
+      files:
+        add:
+          # Terra ships the Noctalia shell, the Umbriel compositor and the
+          # Noctalia greeter. It is not part of Fedora. The file name carries
+          # the Fedora release, so %OS_VERSION% has to match image-version.
+          - terra-%OS_VERSION%.repo
+      keys:
+        - https://repos.fyralabs.com/terra%OS_VERSION%/key.asc
+    install:
+      packages:
+        # terminal
+        - foot
+        # micro is the only editor on this image
+        - micro
+        # compositor, desktop shell and login screen
+        - umbriel-nightly
+        - noctalia
+        - noctalia-greeter
+        # desktop portals for the Umbriel session (screenshot, screen share)
+        - xdg-desktop-portal-umbriel-nightly
+        # login
+        - greetd
+        # first-boot wizard that creates the user account
+        - initial-setup
+        # session plumbing
+        - polkit
+        - systemd-pam
+        - gnome-keyring
+        - accountsservice
+        # networking: iwd is picked automatically on Intel wireless cards
+        - iwd
+        - bluez
+        # userland
+        - git
+        - git-credential-libsecret
+        - stow
+        - htop
+        - distrobox
+        - tailscale
+    remove:
+      packages:
+        # the browser ships as a flatpak instead
+        - firefox
+        - firefox-langpacks
+
+        # micro is the only editor: drop nano, vi and the alternatives
+        - nano
+        - nano-default-editor
+        - default-editor
+        - vim
+        - vim-enhanced
+        - vim-minimal
+        - vim-common
+        - vim-data
+        - vim-filesystem
+        - vim-default-editor
+
   - type: files
     files:
       - source: system
-        destination: / # copies files/system/* (* means everything inside it) into your image's root folder /
+        destination: /
 
-  - type: dnf
-    repos:
-      copr:
-        - atim/starship
-    install:
-      packages:
-        - micro
-        - starship
-    remove:
-      packages:
-        # example: removing firefox (in favor of the flatpak)
-        # "firefox" is the main package, "firefox-langpacks" is a dependency
-        - firefox
-        - firefox-langpacks # also remove firefox dependency (not required for all packages, this is a special case)
+  - type: script
+    snippets:
+      # keep nano and rnano working, pointing at micro
+      - ln -sf /usr/bin/micro /usr/bin/nano
+      - ln -sf /usr/bin/micro /usr/bin/rnano
+      # point greetd at the Noctalia greeter, running as its own account
+      - sed -i -e 's|^command = .*|command = "/usr/bin/noctalia-greeter-session"|' -e 's|^user = .*|user = "greeter"|' /etc/greetd/config.toml
+      # greetd needs a logind session for the greeter account; the shared
+      # system-auth stack leaves pam_systemd disabled by default
+      - grep -qE '^[[:space:]]*session[[:space:]]+required[[:space:]]+pam_systemd\.so' /etc/pam.d/greetd || printf 'session required pam_systemd.so\n' >> /etc/pam.d/greetd
+      # the wifi backend detection script has to be executable
+      - chmod 0755 /usr/libexec/moonos/select-wifi-backend
+
+  - type: systemd
+    system:
+      enabled:
+        - greetd.service
+        - initial-setup.service
+        - moonos-wifi-backend.service
+        - moonos-greeter-setup.service
 
   - type: default-flatpaks
     configurations:
@@ -38,8 +103,9 @@ modules:
         scope: system
         # If no repo information is specified, Flathub will be used by default
         install: # system flatpaks we want all users to have and not remove
-          - org.mozilla.firefox
+          - io.gitlab.librewolf-community
           - org.gnome.Loupe
+          - com.valvesoftware.Steam
       - scope: user # Also add Flathub user repo, but no user packages
 
   - type: signing # this sets up the proper policy & signing files for signed images to work fully
