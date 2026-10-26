@@ -60,6 +60,13 @@ jobs:
           # !! Add your recipes here
           - recipe.yml
     steps:
+      # the kernel check reads the recipe and the helper script, so the
+      # repository has to be in the workspace before the first step
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
       # the kernel modules moonOS ships are prebuilt for one exact kernel.
       # If the base image has moved on, Universal Blue has not rebuilt the
       # bundle yet and the modules cannot be installed, so stop here rather
@@ -71,6 +78,8 @@ jobs:
       - name: Build Custom Image
         uses: blue-build/github-action@c295af864f2802fc6aea227507af43d35823db81 # v1.13
         with:
+          # the repository is already checked out above
+          skip_checkout: true
           recipe: ${{ matrix.recipe }}
           cosign_private_key: ${{ secrets.SIGNING_SECRET }}
           # publish to the GitHub container registry; the image name comes
