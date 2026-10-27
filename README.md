@@ -22,7 +22,7 @@ The image is published to `ghcr.io/ammunoz/moonos`.
 | Fonts | Cantarell, Noto Sans/Serif/Mono, Noto Color Emoji, plus Inter and JetBrains Mono (a Nerd Font) |
 | Desktop extras | `file-roller` (archives), `pavucontrol` (audio mixer), `seahorse` (Passwords and Keys), `ddcutil` (external monitor brightness) |
 | Preview tools | `poppler-utils` (PDF), `ImageMagick` (fonts, HEIC, JXL), `ffmpeg-free` (video), `resvg` (SVG) |
-| Flatpaks (system) | Flatseal, Calculator, Document Viewer, Image Viewer, Music |
+| Flatpaks (system) | Flatseal, Calculator, Document Viewer, Image Viewer |
 | Flatpaks (user) | Betterbird, Bitwarden, Discord, Heroic, Krita, LibreOffice, LibreWolf, mpv, OBS Studio, Spotify, Steam, Zoom |
 | Replaced | `nano` and `vim` with `micro`; `firefox` with the LibreWolf Flatpak |
 
@@ -220,8 +220,8 @@ the machine is an Intel one, `wpa_supplicant` otherwise. Both are installed.
 ## Known limitations
 
 - **User-scope Flatpaks arrive on the first login**, not at first boot. The
-  file types that they handle — web pages, video, office documents — have no
-  application until then.
+  file types that they handle — web pages, audio, video, office documents —
+  have no application until then.
 - **No NVIDIA driver.** The image ships the standard Mesa stack only.
 - **No `nct6687d`.** Universal Blue builds that module in their `extra`
   bundle, which is not published for Fedora's mainline kernel, and Fedora

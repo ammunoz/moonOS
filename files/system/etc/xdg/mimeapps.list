@@ -33,9 +33,8 @@ application/x-pdf=org.gnome.Evince.desktop
 application/epub+zip=org.gnome.Evince.desktop
 
 # Audio and video: mpv (user scope). Its desktop entry declares every
-# media type and takes the file as an argument. GNOME Music is installed
-# as well, but its entry has no MimeType and no file argument, so it is
-# an application to listen to the library, not a file handler.
+# media type and takes the file as an argument, so it can open what the
+# file manager hands it.
 audio/aac=io.mpv.Mpv.desktop
 audio/flac=io.mpv.Mpv.desktop
 audio/mp4=io.mpv.Mpv.desktop

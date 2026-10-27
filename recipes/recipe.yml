@@ -200,7 +200,6 @@ modules:
           - org.gnome.Calculator
           - org.gnome.Evince
           - org.gnome.Loupe
-          - org.gnome.Music
       - scope: user # user flatpaks, installed for each user on their first login
         repo:
           title: Flathub (user)
