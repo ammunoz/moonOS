@@ -37,6 +37,66 @@ The addons package is not installed. The certificate is taken out of it
 instead, with `rpm2cpio` and `cpio`, and lands at
 `/etc/pki/akmods/certs/akmods-ublue.der`.
 
+## Why not the built-in module
+
+BlueBuild ships a built-in `akmods` module, documented at
+[blue-build.org/reference/modules/akmods](https://blue-build.org/reference/modules/akmods/).
+The recipe's `type: akmods` names that module, but `source: local` replaces
+its script with [`modules/akmods/akmods.sh`](../modules/akmods/akmods.sh),
+so the documented options do not apply:
+
+| Documented option | Here |
+|---|---|
+| `install:` — the list of modules to install | not used; the script globs the bundle itself (`kmod-xone-*.rpm` and so on) |
+| `nvidia-driver:` — `nvidia` or `nvidia-open` | not used; moonOS ships no NVIDIA driver |
+| `base:` — the kernel flavour | `main`; this is what picks the bundle that gets staged |
+
+The differences that matter are in the install itself:
+
+- The built-in script installs through `rpm-ostree` and temporarily installs
+  **RPM Fusion**, which the `wl` and `v4l2loopback` akmods need. moonOS
+  takes the packages out of the bundle and installs them with `dnf5`, so no
+  RPM Fusion repository ever enters the image.
+- The built-in script resolves the userspace packages — the "common" ones
+  with the modprobe and udev rules — from the `ublue-os/akmods` COPR. Here
+  they are installed from the bundle. That is what the upstream
+  documentation's *"some akmods are not installing due to lack of some
+  additional akmod package"* problem is about: with the built-in script the
+  image needs a second repository in the `rpm-ostree` module. It does not
+  apply to moonOS.
+- The built-in script does not take the signing certificate out of the
+  addons package, which the [Secure Boot](#secure-boot) section needs.
+- The built-in script has no kernel-match check. Upstream lists the
+  resulting build failure as a known issue: the transaction dies with a
+  dependency solving error when the bundle is older than the base image's
+  kernel. moonOS stops earlier, with a clear message — see
+  [the kernel-match check](#the-kernel-match-check).
+
+### The recipe entry is a custom module
+
+`bluebuild validate`, which CI runs on the recipe, checks each module entry
+against the published JSON schema. An entry has to match either a built-in
+module schema or the generic custom module schema, and this one matches the
+**custom** one:
+
+- the built-in `akmods` schema requires `install:` and allows no other key,
+  `source:` included
+- the custom module schema requires `type:` and `source:`, and allows
+  anything else
+
+So the entry
+
+```yaml
+- type: akmods
+  source: local
+  base: main
+```
+
+is valid because of `source: local`, and the missing `install:` list is not
+an oversight. Removing `source: local` means adding `install:` as well,
+and that switches the build over to the built-in script with all the
+differences listed above.
+
 ## Why the bundle goes in first
 
 The `akmods` module runs **before** the `dnf` module in the recipe, and that
@@ -81,6 +141,32 @@ python3 scripts/check-akmods-kernel.py
 **During the install** — `akmods.sh` compares the `kernel-uname-r`
 requirement of the module RPMs — read from the first one — against the kernel
 in the image and aborts if they differ.
+
+## The staging is deprecated upstream
+
+BlueBuild hands the bundle to the module through a mount that its own
+templates mark as `TODO: Needs to be deprecated`:
+
+```
+{#- Akmods mount #}
+{#- TODO: Needs to be deprecated #}
+```
+
+The built-in script and [`modules/akmods/akmods.sh`](../modules/akmods/akmods.sh)
+both read the bundle from that mount, so when it goes the build fails with
+`ERROR: ... is not in the akmods bundle`. The upstream issues to watch are:
+
+- [blue-build/cli#354](https://github.com/blue-build/cli/issues/354) — akmods
+  tags keyed by kernel version, which would change the `main-<version>` tag
+  that [`scripts/check-akmods-kernel.py`](../scripts/check-akmods-kernel.py)
+  looks for
+- [blue-build/cli#882](https://github.com/blue-build/cli/issues/882) — the next
+  generation build engine
+
+Until then, nothing has to change. If the mount does go, the way out is for
+the script to fetch the bundle itself — `skopeo copy` from
+`ghcr.io/ublue-os/akmods:main-<version>`, the way the built-in script's
+Nvidia path already does it.
 
 ## Secure Boot
 

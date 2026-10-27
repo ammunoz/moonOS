@@ -17,6 +17,23 @@ modules:
   # "source: local" makes it run modules/akmods/akmods.sh instead of the
   # built-in script.
   #
+  # The built-in script is the one BlueBuild documents at
+  # blue-build.org/reference/modules/akmods/: it takes an "install:" list,
+  # installs through rpm-ostree and detours via RPM Fusion, and never
+  # extracts the signing certificate from the bundle. Ours takes the
+  # packages out of the bundle and installs them with dnf5, which keeps RPM
+  # Fusion out of the image and lets it extract the certificate the Secure
+  # Boot flow needs. documents/kernel-modules.md has the full comparison.
+  #
+  # Because of "source: local" this entry is validated against the generic
+  # custom module schema, not the akmods one: the akmods schema requires
+  # "install:" and allows no other keys. Dropping "source: local" means
+  # adding "install:" as well, which switches the build over to the built-in
+  # script.
+  #
+  # "base" is the kernel flavour the bundle is built for. BlueBuild reads it
+  # when it stages the bundle, so it has to match the base image's kernel.
+  #
   # This has to run before the dnf module. openrazer-daemon pulls in the
   # openrazer package, which needs something to provide openrazer-kmod.
   # Until the bundle is installed, the only provider is Terra's
