@@ -1,0 +1,21 @@
+#:schema https://yazi-rs.github.io/schemas/theme.json
+
+# A theme for yazi in the same Nord colours as the kitty configuration.
+# It is merged over yazi's own themes, so only the tokens that differ from
+# the default are here.
+
+[flavor]
+dark  = ""
+light = ""
+
+[mgr]
+cwd           = { fg = "#88C0D0" }
+find_keyword  = { fg = "#EBCB8B", bold = true, italic = true, underline = true }
+find_position = { fg = "#B48EAD", bg = "reset", bold = true, italic = true }
+marker_copied   = { fg = "#A3BE8C", bg = "#A3BE8C" }
+marker_cut      = { fg = "#BF616A", bg = "#BF616A" }
+marker_marked   = { fg = "#88C0D0", bg = "#88C0D0" }
+marker_selected = { fg = "#EBCB8B", bg = "#EBCB8B" }
+count_copied    = { fg = "#2E3440", bg = "#A3BE8C" }
+count_cut       = { fg = "#2E3440", bg = "#BF616A" }
+count_selected  = { fg = "#2E3440", bg = "#EBCB8B" }

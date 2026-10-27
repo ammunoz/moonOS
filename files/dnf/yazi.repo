@@ -1,0 +1,19 @@
+# Yazi, the file manager, from the unofficial COPR that the yazi
+# documentation points at:
+# https://yazi-rs.github.io/docs/installation/#copr
+#
+# Yazi is not packaged in Fedora. This COPR builds it for every Fedora
+# release, together with resvg, which yazi uses for SVG previews.
+#
+# The repository is removed again once the packages are installed, so it
+# only exists during the build. It has no skip_if_unavailable: Fedora has
+# no yazi to fall back to, so an unreachable COPR has to stop the build
+# instead of quietly producing an image without a file manager.
+[lihaohong-yazi]
+name=Copr repo for yazi owned by lihaohong
+baseurl=https://download.copr.fedorainfracloud.org/results/lihaohong/yazi/fedora-$releasever-$basearch/
+type=rpm-md
+enabled=1
+gpgcheck=1
+repo_gpgcheck=0
+gpgkey=https://download.copr.fedorainfracloud.org/results/lihaohong/yazi/pubkey.gpg

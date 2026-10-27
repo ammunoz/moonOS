@@ -1,0 +1,38 @@
+#:schema https://yazi-rs.github.io/schemas/yazi.json
+
+# The moonOS defaults for yazi.
+#
+# This file is merged over yazi's own defaults, so it only carries what
+# moonOS changes. The keymap, the previews, the search and the plugins all
+# work out of the box.
+#
+# New accounts get this file from /etc/skel. An account that already exists
+# can take it with:
+#
+#     cp -r /etc/skel/.config/yazi ~/.config/
+
+[mgr]
+# More room for the preview pane, where the image previews are rendered.
+# The three numbers are the parent, the current and the preview pane.
+ratio = [ 1, 3, 4 ]
+
+[opener]
+# There is no vi on this image, so micro is the fallback when EDITOR is not
+# set in the session. EDITOR is micro everywhere else.
+edit = [
+	{ run = "${EDITOR:-micro} %s", desc = "$EDITOR", for = "unix", block = true },
+]
+# xdg-open picks the application from the MIME defaults: Loupe for images,
+# Evince for documents, mpv for videos.
+play = [
+	{ run = "xdg-open %s1", desc = "Play", for = "unix", orphan = true },
+	{ run = "ffprobe -v quiet -show_format -show_streams %s1; echo 'Press enter to exit'; read _", desc = "Show media info", for = "unix", block = true },
+]
+open = [
+	{ run = "xdg-open %s1", desc = "Open", for = "unix" },
+]
+reveal = [
+	{ run = "xdg-open %d1", desc = "Reveal", for = "unix" },
+	{ run = "kitty --working-directory %d1 -e yazi %s1", desc = "Open in a new window", for = "unix", orphan = true },
+	{ run = "magick identify %s1; echo 'Press enter to exit'; read _", desc = "Show image info", for = "unix", block = true },
+]

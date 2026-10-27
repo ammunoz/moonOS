@@ -39,13 +39,38 @@ modules:
           # Tailscale's own repository. It carries newer releases than
           # Fedora does, and skips itself when it cannot be reached.
           - tailscale.repo
+          # Yazi, the file manager, from the unofficial COPR the yazi
+          # documentation points at. Yazi is not packaged in Fedora.
+          - yazi.repo
       keys:
         - https://repos.fyralabs.com/terra%OS_VERSION%/key.asc
         - https://pkgs.tailscale.com/stable/fedora/repo.gpg
+        - https://download.copr.fedorainfracloud.org/results/lihaohong/yazi/pubkey.gpg
     install:
       packages:
         # terminal
-        - foot
+        - kitty
+        # the file manager, from the COPR added above
+        - yazi
+        # the tools yazi shells out to for its previews and its search. Most
+        # of them come in as weak dependencies of yazi, but the image should
+        # not depend on that.
+        - resvg
+        - fd-find
+        - ripgrep
+        - fzf
+        - zoxide
+        # previewers: PDF, fonts and HEIC/JXL images, video thumbnails.
+        # Fedora has no ffmpeg package, only ffmpeg-free.
+        - poppler-utils
+        - ImageMagick
+        - ffmpeg-free
+        # desktop integration: the MIME database, the desktop database and
+        # the default terminal for "open in a terminal"
+        - shared-mime-info
+        - desktop-file-utils
+        - xdg-utils
+        - xdg-terminal-exec
         # micro is the only editor on this image
         - micro
         - micro-default-editor
@@ -137,6 +162,12 @@ modules:
       - chmod 0755 /usr/libexec/moonos/select-wifi-backend
       # the MOK enrolment helper is run by systemd as root
       - chmod 0755 /usr/libexec/moonos/enroll-akmods-key
+      # the desktop database has to know about the entries the files module
+      # dropped in, or xdg-mime does not see them
+      - update-desktop-database /usr/share/applications
+      # and the MIME database has to know about the types the desktop
+      # entries declare
+      - update-mime-database /usr/share/mime
 
   - type: systemd
     system:

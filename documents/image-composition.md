@@ -11,6 +11,7 @@ image and where those packages come from.
 | Fedora 44 | everything not listed below |
 | [Terra](https://wiki.fyralabs.com/Terra) | `umbriel-nightly`, `noctalia-greeter`, `xdg-desktop-portal-umbriel-nightly` |
 | [Tailscale](https://pkgs.tailscale.com/stable/fedora/) | `tailscale`, which runs a few releases ahead of Fedora's |
+| [COPR: lihaohong/yazi](https://copr.fedorainfracloud.org/coprs/lihaohong/yazi) | `yazi` and `resvg`, which Fedora does not package |
 | [Universal Blue](https://github.com/ublue-os/akmods) | the prebuilt kernel modules |
 | Flathub | the system and user Flatpaks |
 
@@ -26,6 +27,14 @@ picks. Terra is only needed for the compositor, the greeter and the portal.
 Tailscale's repository is added from `files/dnf/tailscale.repo`, a copy of
 Tailscale's own with `skip_if_unavailable` set, so an outage there falls back
 to Fedora's copy instead of failing the build.
+
+Yazi is not packaged in Fedora at all. It comes from the unofficial COPR that
+the yazi documentation points at, added from `files/dnf/yazi.repo`. That
+repository builds yazi and `resvg` for every Fedora release, and its base URL
+carries `$releasever`, so it follows the base image's release without the
+file having to be renamed. Unlike Tailscale's, it has no `skip_if_unavailable`:
+there is no Fedora package to fall back to, so an outage has to fail the
+build instead of producing an image without a file manager.
 
 Umbriel only exists as a nightly build (`umbriel-nightly`); there is no stable
 release yet, so it will churn between builds.

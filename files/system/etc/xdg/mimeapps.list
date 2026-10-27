@@ -1,0 +1,145 @@
+# Default applications for moonOS.
+#
+# This is the system-wide file, $XDG_CONFIG_DIRS/mimeapps.list. A user can
+# override any of it in ~/.config/mimeapps.list.
+#
+# The mapping from a file extension to a MIME type is not in here: that is
+# what shared-mime-info does, and every package with a desktop file feeds
+# it. This file only says which application opens which type.
+#
+# The Flatpak entries are split by scope. The system scope is installed
+# during boot, so those work right away. The user scope is installed on the
+# first login, so those associations only resolve after that.
+
+[Default Applications]
+
+# Images: the GNOME Image Viewer.
+image/png=org.gnome.Loupe.desktop
+image/jpeg=org.gnome.Loupe.desktop
+image/gif=org.gnome.Loupe.desktop
+image/webp=org.gnome.Loupe.desktop
+image/bmp=org.gnome.Loupe.desktop
+image/tiff=org.gnome.Loupe.desktop
+image/svg+xml=org.gnome.Loupe.desktop
+image/avif=org.gnome.Loupe.desktop
+image/heic=org.gnome.Loupe.desktop
+image/jxl=org.gnome.Loupe.desktop
+image/x-icon=org.gnome.Loupe.desktop
+image/vnd.microsoft.icon=org.gnome.Loupe.desktop
+
+# Documents: the GNOME Document Viewer.
+application/pdf=org.gnome.Evince.desktop
+application/x-pdf=org.gnome.Evince.desktop
+application/epub+zip=org.gnome.Evince.desktop
+
+# Audio and video: mpv (user scope). Its desktop entry declares every
+# media type and takes the file as an argument. GNOME Music is installed
+# as well, but its entry has no MimeType and no file argument, so it is
+# an application to listen to the library, not a file handler.
+audio/aac=io.mpv.Mpv.desktop
+audio/flac=io.mpv.Mpv.desktop
+audio/mp4=io.mpv.Mpv.desktop
+audio/mpeg=io.mpv.Mpv.desktop
+audio/ogg=io.mpv.Mpv.desktop
+audio/wav=io.mpv.Mpv.desktop
+audio/webm=io.mpv.Mpv.desktop
+audio/x-aac=io.mpv.Mpv.desktop
+audio/x-flac=io.mpv.Mpv.desktop
+audio/x-mpeg=io.mpv.Mpv.desktop
+audio/x-ms-wma=io.mpv.Mpv.desktop
+audio/x-ogg=io.mpv.Mpv.desktop
+audio/x-vorbis=io.mpv.Mpv.desktop
+audio/x-vorbis+ogg=io.mpv.Mpv.desktop
+audio/x-wav=io.mpv.Mpv.desktop
+
+# Video: mpv (user scope).
+video/3gpp=io.mpv.Mpv.desktop
+video/3gpp2=io.mpv.Mpv.desktop
+video/mp4=io.mpv.Mpv.desktop
+video/mpeg=io.mpv.Mpv.desktop
+video/ogg=io.mpv.Mpv.desktop
+video/quicktime=io.mpv.Mpv.desktop
+video/webm=io.mpv.Mpv.desktop
+video/x-flv=io.mpv.Mpv.desktop
+video/x-matroska=io.mpv.Mpv.desktop
+video/x-msvideo=io.mpv.Mpv.desktop
+
+# Archives: the GNOME Archive Manager.
+application/zip=org.gnome.FileRoller.desktop
+application/x-tar=org.gnome.FileRoller.desktop
+application/x-gtar=org.gnome.FileRoller.desktop
+application/gzip=org.gnome.FileRoller.desktop
+application/x-gzip=org.gnome.FileRoller.desktop
+application/x-bzip=org.gnome.FileRoller.desktop
+application/x-bzip2=org.gnome.FileRoller.desktop
+application/x-xz=org.gnome.FileRoller.desktop
+application/x-lzma=org.gnome.FileRoller.desktop
+application/x-lz4=org.gnome.FileRoller.desktop
+application/zstd=org.gnome.FileRoller.desktop
+application/x-7z-compressed=org.gnome.FileRoller.desktop
+application/x-rar=org.gnome.FileRoller.desktop
+application/vnd.rar=org.gnome.FileRoller.desktop
+application/x-archive=org.gnome.FileRoller.desktop
+application/x-cpio=org.gnome.FileRoller.desktop
+application/x-iso9660-image=org.gnome.FileRoller.desktop
+application/java-archive=org.gnome.FileRoller.desktop
+application/x-zoo=org.gnome.FileRoller.desktop
+
+# Office documents: LibreOffice (user scope). The Flatpak exports one
+# desktop file per module, so a spreadsheet opens in Calc and a
+# presentation in Impress.
+application/vnd.oasis.opendocument.text=org.libreoffice.LibreOffice.writer.desktop
+application/vnd.oasis.opendocument.text-template=org.libreoffice.LibreOffice.writer.desktop
+application/vnd.ms-word=org.libreoffice.LibreOffice.writer.desktop
+application/msword=org.libreoffice.LibreOffice.writer.desktop
+application/vnd.openxmlformats-officedocument.wordprocessingml.document=org.libreoffice.LibreOffice.writer.desktop
+application/vnd.openxmlformats-officedocument.wordprocessingml.template=org.libreoffice.LibreOffice.writer.desktop
+application/rtf=org.libreoffice.LibreOffice.writer.desktop
+application/vnd.oasis.opendocument.spreadsheet=org.libreoffice.LibreOffice.calc.desktop
+application/vnd.oasis.opendocument.spreadsheet-template=org.libreoffice.LibreOffice.calc.desktop
+application/vnd.ms-excel=org.libreoffice.LibreOffice.calc.desktop
+application/vnd.openxmlformats-officedocument.spreadsheetml.sheet=org.libreoffice.LibreOffice.calc.desktop
+application/vnd.openxmlformats-officedocument.spreadsheetml.template=org.libreoffice.LibreOffice.calc.desktop
+application/vnd.oasis.opendocument.presentation=org.libreoffice.LibreOffice.impress.desktop
+application/vnd.oasis.opendocument.presentation-template=org.libreoffice.LibreOffice.impress.desktop
+application/vnd.ms-powerpoint=org.libreoffice.LibreOffice.impress.desktop
+application/vnd.openxmlformats-officedocument.presentationml.presentation=org.libreoffice.LibreOffice.impress.desktop
+application/vnd.oasis.opendocument.graphics=org.libreoffice.LibreOffice.draw.desktop
+application/vnd.oasis.opendocument.graphics-template=org.libreoffice.LibreOffice.draw.desktop
+application/vnd.oasis.opendocument.formula=org.libreoffice.LibreOffice.math.desktop
+application/vnd.oasis.opendocument.database=org.libreoffice.LibreOffice.base.desktop
+
+# The web: LibreWolf (user scope).
+x-scheme-handler/http=io.gitlab.librewolf-community.desktop
+x-scheme-handler/https=io.gitlab.librewolf-community.desktop
+x-scheme-handler/ftp=io.gitlab.librewolf-community.desktop
+
+# Text and code: micro, in a kitty window.
+text/plain=moonos-micro.desktop
+text/markdown=moonos-micro.desktop
+text/x-markdown=moonos-micro.desktop
+text/x-shellscript=moonos-micro.desktop
+text/x-diff=moonos-micro.desktop
+text/x-patch=moonos-micro.desktop
+text/x-log=moonos-micro.desktop
+text/x-readme=moonos-micro.desktop
+text/x-csv=moonos-micro.desktop
+text/tab-separated-values=moonos-micro.desktop
+text/xml=moonos-micro.desktop
+application/x-shellscript=moonos-micro.desktop
+application/json=moonos-micro.desktop
+application/xml=moonos-micro.desktop
+application/x-desktop=moonos-micro.desktop
+application/x-yaml=moonos-micro.desktop
+application/yaml=moonos-micro.desktop
+application/toml=moonos-micro.desktop
+application/x-perl=moonos-micro.desktop
+application/x-python=moonos-micro.desktop
+
+# Web pages: the browser. micro stays an alternative in the "open with"
+# menu, because its desktop entry declares the type as well.
+text/html=io.gitlab.librewolf-community.desktop
+application/xhtml+xml=io.gitlab.librewolf-community.desktop
+
+# Folders: yazi, in a kitty window.
+inode/directory=moonos-yazi.desktop

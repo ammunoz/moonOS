@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=Yazi
+GenericName=File Manager
+Comment=Browse the file system in the terminal
+Exec=kitty --title Yazi -e yazi %f
+Icon=kitty
+Terminal=false
+Categories=System;FileTools;
+MimeType=inode/directory;
+Keywords=file;manager;terminal;folder;
+StartupNotify=true

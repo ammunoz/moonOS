@@ -15,11 +15,13 @@ The image is published to `ghcr.io/ammunoz/moonos`.
 | Shell | `noctalia` — Noctalia desktop shell |
 | Compositor | `umbriel-nightly` — Umbriel Wayland compositor |
 | Login | `greetd` + `noctalia-greeter` |
-| Terminal | `foot` |
+| Terminal | `kitty` |
+| File manager | `yazi` — a terminal file manager with image previews |
 | Editor | `micro` — the default editor, also aliased as `nano` and `rnano` |
 | Kernel modules | `xone`, `xpadneo`, `v4l2loopback`, `openrazer`, `wl` |
 | Fonts | Cantarell, Noto Sans/Serif/Mono, Noto Color Emoji, plus Inter and JetBrains Mono (a Nerd Font) |
 | Desktop extras | `file-roller` (archives), `pavucontrol` (audio mixer), `seahorse` (Passwords and Keys), `ddcutil` (external monitor brightness) |
+| Preview tools | `poppler-utils` (PDF), `ImageMagick` (fonts, HEIC, JXL), `ffmpeg-free` (video), `resvg` (SVG) |
 | Flatpaks (system) | Flatseal, Calculator, Document Viewer, Image Viewer, Music |
 | Flatpaks (user) | Betterbird, Bitwarden, Discord, Heroic, Krita, LibreOffice, LibreWolf, mpv, OBS Studio, Spotify, Steam, Zoom |
 | Replaced | `nano` and `vim` with `micro`; `firefox` with the LibreWolf Flatpak |
@@ -39,6 +41,50 @@ Flatpaks are installed in two passes:
 
 The browser (LibreWolf), Steam, OBS Studio, Discord and the rest are user
 scope, so they arrive after you log in the first time — not at first boot.
+
+## The terminal and the file manager
+
+The terminal is **kitty**, and the file manager is **yazi**, which runs inside
+it. yazi renders its previews with kitty's graphics protocol, so images,
+SVGs, PDFs, videos, fonts and archives all preview in the preview pane
+without leaving the terminal.
+
+`kitty` is configured system-wide in `/etc/xdg/kitty/kitty.conf`: the JetBrains
+Mono Nerd Font that the image installs, a Nord colour scheme that matches
+yazi's theme, and <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>I</kbd> to show an
+image in the terminal. A user's own `~/.config/kitty/kitty.conf` overrides it.
+
+`yazi` is configured with `/etc/skel/.config/yazi/`, which is copied into
+every **new** account. It is a small file: yazi merges it over its own
+defaults, so it only carries what moonOS changes — a wider preview pane, micro
+as the editor fallback (there is no `vi` on this image) and an *Open in a new
+window* action for the files you select.
+
+To take the same configuration on an account that already exists:
+
+```bash
+cp -r /etc/skel/.config/yazi ~/.config/
+```
+
+## Opening files
+
+The image has default applications for the file types it can handle, in
+`/etc/xdg/mimeapps.list`:
+
+| Type | Opens with |
+|---|---|
+| Images | Image Viewer (Loupe) |
+| PDF and EPUB | Document Viewer (Evince) |
+| Audio and video | mpv |
+| Archives | Archive Manager (file-roller) |
+| Office documents | LibreOffice |
+| Web pages | LibreWolf |
+| Text and code | micro, in a kitty window |
+| Folders | yazi, in a kitty window |
+
+The Flatpaks in the first six rows are installed with the image or on the
+first login, so the association starts working once the Flatpak in question
+is there. A user can override any of it in `~/.config/mimeapps.list`.
 
 ## Kernel modules
 
@@ -155,6 +201,11 @@ make sure the **Login** keyring is the default:
 | What | Where |
 |---|---|
 | Umbriel compositor | `/usr/etc/xdg/umbriel/config.toml` — system-wide default, users can override it in `~/.config/umbriel/config.toml` |
+| Terminal | `/etc/xdg/kitty/kitty.conf` — system-wide kitty configuration, users can override it in `~/.config/kitty/kitty.conf` |
+| Terminal variable | `/usr/lib/environment.d/95-terminal.conf` and `/etc/profile.d/terminal.sh` — set `TERMINAL=kitty` |
+| Default applications | `/etc/xdg/mimeapps.list` — which application opens which file type |
+| Default terminal | `/etc/xdg/xdg-terminals.list` — kitty, for applications that ask `xdg-terminal-exec` |
+| File manager | `/etc/skel/.config/yazi/` — copied into every new account, and overridden by the user's own config |
 | Shell defaults | `/etc/skel/.config/noctalia/00-moonos.toml` — copied into every new account, and overridden by the user's own config |
 | Noctalia shell | `~/.config/noctalia/config.toml` — the shell reads every `*.toml` in that directory |
 | Noctalia state | `~/.local/state/noctalia/settings.toml` — written by the settings UI, do not edit by hand |
@@ -168,9 +219,9 @@ the machine is an Intel one, `wpa_supplicant` otherwise. Both are installed.
 
 ## Known limitations
 
-- **No file manager yet.** A separate effort is in progress. Until then, use
-  the file chooser in any app, or `foot` and `micro`.
-- **User-scope Flatpaks arrive on the first login**, not at first boot.
+- **User-scope Flatpaks arrive on the first login**, not at first boot. The
+  file types that they handle — web pages, video, office documents — have no
+  application until then.
 - **No NVIDIA driver.** The image ships the standard Mesa stack only.
 - **No `nct6687d`.** Universal Blue builds that module in their `extra`
   bundle, which is not published for Fedora's mainline kernel, and Fedora

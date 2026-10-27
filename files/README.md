@@ -6,30 +6,44 @@ Drop-in directories that BlueBuild modules read at build time.
 files/
 ├── dnf/
 │   ├── tailscale.repo            Tailscale's repository
-│   └── terra-44.repo             the Terra repository definition
+│   ├── terra-44.repo             the Terra repository definition
+│   └── yazi.repo                 the COPR the yazi file manager comes from
 ├── system/                       copied into the image root
 │   ├── etc/
 │   │   ├── profile.d/
-│   │   │   └── micro.sh
+│   │   │   ├── micro.sh
+│   │   │   └── terminal.sh
 │   │   ├── skel/
 │   │   │   └── .config/
-│   │   │       └── noctalia/
-│   │   │           └── 00-moonos.toml
+│   │   │       ├── noctalia/
+│   │   │       │   └── 00-moonos.toml
+│   │   │       └── yazi/
+│   │   │           ├── theme.toml
+│   │   │           └── yazi.toml
 │   │   └── xdg/
-│   │       └── umbriel/
-│   │           └── config.toml
+│   │       ├── kitty/
+│   │       │   └── kitty.conf
+│   │       ├── mimeapps.list
+│   │       ├── umbriel/
+│   │       │   └── config.toml
+│   │       └── xdg-terminals.list
 │   └── usr/
 │       ├── lib/
 │       │   ├── environment.d/
-│       │   │   └── 90-micro-editor.conf
+│       │   │   ├── 90-micro-editor.conf
+│       │   │   └── 95-terminal.conf
 │       │   ├── sysusers.d/
 │       │   │   └── noctalia-greeter.conf
 │       │   └── tmpfiles.d/
 │       │       └── noctalia-greeter.conf
-│       └── libexec/
-│           └── moonos/
-│               ├── enroll-akmods-key
-│               └── select-wifi-backend
+│       ├── libexec/
+│       │   └── moonos/
+│       │       ├── enroll-akmods-key
+│       │       └── select-wifi-backend
+│       └── share/
+│           └── applications/
+│               ├── moonos-micro.desktop
+│               └── moonos-yazi.desktop
 └── systemd/
     └── system/
         ├── moonos-akmods-key.service
@@ -66,16 +80,39 @@ Two things to know:
 | File | Purpose |
 |---|---|
 | `etc/profile.d/micro.sh` | sets `EDITOR`/`VISUAL`/`GIT_EDITOR` to `micro` for login shells |
+| `etc/profile.d/terminal.sh` | sets `TERMINAL=kitty` for login shells |
 | `etc/skel/.config/noctalia/00-moonos.toml` | Noctalia defaults copied into every new account: DDC/CI brightness for external monitors |
-| `etc/xdg/umbriel/config.toml` | system-wide Umbriel configuration: starts Noctalia, appearance, `foot` on `Mod+Return` |
+| `etc/skel/.config/yazi/` | the yazi defaults copied into every new account: a wider preview pane, micro as the editor, *Open in a new window* |
+| `etc/xdg/kitty/kitty.conf` | system-wide kitty configuration: the Nerd Font, the Nord colours, the `icat` kitten |
+| `etc/xdg/mimeapps.list` | which application opens which file type |
+| `etc/xdg/umbriel/config.toml` | system-wide Umbriel configuration: starts Noctalia, appearance, `kitty` on `Mod+Return` |
+| `etc/xdg/xdg-terminals.list` | kitty, for applications that ask `xdg-terminal-exec` for a terminal |
 | `usr/lib/environment.d/90-micro-editor.conf` | sets `EDITOR`/`VISUAL`/`GIT_EDITOR` to `micro` for systemd services and user sessions |
+| `usr/lib/environment.d/95-terminal.conf` | sets `TERMINAL=kitty` and names the system Flatpak exports for systemd services and user sessions |
 | `usr/lib/sysusers.d/noctalia-greeter.conf` | creates the `greeter` account the Noctalia greeter runs as |
 | `usr/lib/tmpfiles.d/noctalia-greeter.conf` | creates `/var/lib/noctalia-greeter`, owned by `greeter` |
 | `usr/libexec/moonos/enroll-akmods-key` | stages the MOK enrolment; also runnable by hand |
 | `usr/libexec/moonos/select-wifi-backend` | picks `iwd` or `wpa_supplicant` based on the wireless hardware |
+| `usr/share/applications/moonos-micro.desktop` | micro, in a kitty window; neither micro nor yazi ships a desktop file |
+| `usr/share/applications/moonos-yazi.desktop` | yazi, in a kitty window; also the handler for folders |
 
 The `environment.d` file is the important one — it is what covers a terminal
 opened from the graphical session, where `/etc/profile.d` is never sourced.
+
+### Why the yazi configuration is in `skel`
+
+yazi reads its configuration from `$YAZI_CONFIG_HOME` or `~/.config/yazi`,
+and from nowhere else: there is no system-wide path and no include
+mechanism. Pointing `YAZI_CONFIG_HOME` at a directory in `/usr` would break
+plugin installation, because `/usr` is read-only on an ostree system.
+
+`/etc/skel` is the same channel the Noctalia shell uses for its defaults, and
+it has the same limitation: it is copied when an account is created, so an
+account that already exists has to take the configuration by hand:
+
+```bash
+cp -r /etc/skel/.config/yazi ~/.config/
+```
 
 ### Why the greeter account is in `sysusers.d`
 
@@ -96,9 +133,11 @@ modules:
         add:
           - terra-%OS_VERSION%.repo
           - tailscale.repo
+          - yazi.repo
       keys:
         - https://repos.fyralabs.com/terra%OS_VERSION%/key.asc
         - https://pkgs.tailscale.com/stable/fedora/repo.gpg
+        - https://download.copr.fedorainfracloud.org/results/lihaohong/yazi/pubkey.gpg
 ```
 
 The `dnf` module substitutes `%OS_VERSION%` with the `VERSION_ID` field of
@@ -110,6 +149,13 @@ the packages are installed.
 `skip_if_unavailable=True` added, so that Tailscale's servers being
 unreachable falls back to Fedora's copy of the package instead of failing
 the build.
+
+`yazi.repo` is the unofficial COPR that the yazi documentation points at.
+It carries `$releasever` in its base URL, so it follows the Fedora release
+of the base image without the file having to be renamed, and it has no
+`skip_if_unavailable`: Fedora has no yazi to fall back to, so an unreachable
+COPR has to stop the build rather than quietly produce an image without a
+file manager.
 
 ## `files/systemd/` — systemd units
 

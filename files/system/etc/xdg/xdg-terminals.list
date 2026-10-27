@@ -1,0 +1,5 @@
+# The terminal that xdg-terminal-exec picks for applications that want to
+# open something in a terminal. kitty is the only terminal on this image.
+#
+# See https://flatpak.github.io/xdg-terminal-exec/ for the format.
+kitty.desktop
