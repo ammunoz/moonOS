@@ -16,6 +16,7 @@ The image is published to `ghcr.io/ammunoz/moonos`.
 | Compositor | `umbriel-nightly` — Umbriel Wayland compositor |
 | Login | `greetd` + `noctalia-greeter` |
 | Terminal | `kitty` |
+| Command shell | `zsh`, with the starship prompt and type-ahead completion |
 | File manager | `yazi` — a terminal file manager with image previews |
 | Editor | `micro` — the default editor, also aliased as `nano` and `rnano` |
 | Kernel modules | `xone`, `xpadneo`, `v4l2loopback`, `openrazer`, `wl` |
@@ -65,6 +66,37 @@ To take the same configuration on an account that already exists:
 ```bash
 cp -r /etc/skel/.config/yazi ~/.config/
 ```
+
+## The command shell
+
+The command shell is **zsh**. The prompt is [starship](https://starship.rs),
+which shows the directory, the state of the Git repository, the versions of
+the languages in use and how long the last command took. The completion is
+type-ahead: the menu appears while you type, <kbd>Tab</kbd> takes the top
+match and the arrow keys pick another one.
+
+Both are set up system-wide, in `/etc/zsh/moonos.zsh`, which zsh reads for
+every interactive shell — so an account that was created before the image
+existed gets them as well, without copying anything.
+
+The prompt theme the image ships is `/usr/share/moonos/starship.toml`, in the
+same Nord colours as the terminal. starship has no system-wide configuration
+path, so `/etc/zsh/moonos.zsh` points it there unless the account has a
+`~/.config/starship.toml` of its own. To take the theme over:
+
+```bash
+cp /usr/share/moonos/starship.toml ~/.config/starship.toml
+```
+
+**zsh is the login shell for new accounts.** An account that already exists
+keeps the shell it was created with, and can switch:
+
+```bash
+chsh -s /bin/zsh
+```
+
+A new account also gets `/etc/skel/.zshrc`, which adds the history settings.
+Everything else — the prompt, the completion — is in the system files.
 
 ## Opening files
 
@@ -202,6 +234,10 @@ make sure the **Login** keyring is the default:
 |---|---|
 | Umbriel compositor | `/usr/etc/xdg/umbriel/config.toml` — system-wide default, users can override it in `~/.config/umbriel/config.toml` |
 | Terminal | `/etc/xdg/kitty/kitty.conf` — system-wide kitty configuration, users can override it in `~/.config/kitty/kitty.conf` |
+| Command shell | `/etc/zsh/moonos.zsh` — the starship prompt and the type-ahead completion, for every account |
+| Shell defaults | `/etc/skel/.zshrc` — copied into every new account: the history settings |
+| Prompt theme | `/usr/share/moonos/starship.toml` — used unless the account has a `~/.config/starship.toml` |
+| Default shell | `/etc/default/useradd` — zsh for new accounts |
 | Terminal variable | `/usr/lib/environment.d/95-terminal.conf` and `/etc/profile.d/terminal.sh` — set `TERMINAL=kitty` |
 | Default applications | `/etc/xdg/mimeapps.list` — which application opens which file type |
 | Default terminal | `/etc/xdg/xdg-terminals.list` — kitty, for applications that ask `xdg-terminal-exec` |
@@ -222,6 +258,11 @@ the machine is an Intel one, `wpa_supplicant` otherwise. Both are installed.
 - **User-scope Flatpaks arrive on the first login**, not at first boot. The
   file types that they handle — web pages, audio, video, office documents —
   have no application until then.
+- **Only new accounts get zsh as their login shell.** An account that
+  already exists keeps bash until it runs `chsh -s /bin/zsh`, and an
+  account created by the Anaconda installer during an ISO installation
+  gets bash as well, because Anaconda takes the shell from the installer's
+  own defaults. The prompt and the completion work in zsh either way.
 - **No NVIDIA driver.** The image ships the standard Mesa stack only.
 - **No `nct6687d`.** Universal Blue builds that module in their `extra`
   bundle, which is not published for Fedora's mainline kernel, and Fedora

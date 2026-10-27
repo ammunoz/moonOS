@@ -50,6 +50,11 @@ modules:
       packages:
         # terminal
         - kitty
+        # shell
+        - zsh
+        # the prompt and the type-ahead completion. Both come from Terra.
+        - starship
+        - zsh-autocomplete
         # the file manager, from the COPR added above
         - yazi
         # the tools yazi shells out to for its previews and its search. Most
@@ -168,6 +173,13 @@ modules:
       # and the MIME database has to know about the types the desktop
       # entries declare
       - update-mime-database /usr/share/mime
+      # the zsh setup goes into the system zshrc, so that every account gets
+      # it and not only the ones created after the image was built
+      - grep -q '^source /etc/zsh/moonos.zsh$' /etc/zshrc || printf '\nsource /etc/zsh/moonos.zsh\n' >> /etc/zshrc
+      # zsh is the login shell for new accounts
+      - sed -i 's|^SHELL=.*|SHELL=/bin/zsh|' /etc/default/useradd
+      # the Terra starship package ships no shell completions
+      - mkdir -p /usr/share/zsh/site-functions && starship completions zsh > /usr/share/zsh/site-functions/_starship
 
   - type: systemd
     system:

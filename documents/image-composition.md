@@ -9,7 +9,7 @@ image and where those packages come from.
 | Repository | Used for |
 |---|---|
 | Fedora 44 | everything not listed below |
-| [Terra](https://wiki.fyralabs.com/Terra) | `umbriel-nightly`, `noctalia-greeter`, `xdg-desktop-portal-umbriel-nightly` |
+| [Terra](https://wiki.fyralabs.com/Terra) | `umbriel-nightly`, `noctalia-greeter`, `xdg-desktop-portal-umbriel-nightly`, `starship`, `zsh-autocomplete` |
 | [Tailscale](https://pkgs.tailscale.com/stable/fedora/) | `tailscale`, which runs a few releases ahead of Fedora's |
 | [COPR: lihaohong/yazi](https://copr.fedorainfracloud.org/coprs/lihaohong/yazi) | `yazi` and `resvg`, which Fedora does not package |
 | [Universal Blue](https://github.com/ublue-os/akmods) | the prebuilt kernel modules |
@@ -22,7 +22,12 @@ renaming that file too, and the build fails loudly until you do.
 
 The Noctalia shell itself is in Fedora as well, and Fedora's build is the
 newer one (`5.3.0` against Terra's `5.0.0~beta.9`), so that is the one dnf
-picks. Terra is only needed for the compositor, the greeter and the portal.
+picks. Terra is only needed for the compositor, the greeter, the portal and
+the shell tools.
+
+Terra also carries `starship`, the prompt, and `zsh-autocomplete`, the
+type-ahead completion. Neither is in Fedora, and both are used by the
+command shell the image sets up.
 
 Tailscale's repository is added from `files/dnf/tailscale.repo`, a copy of
 Tailscale's own with `skip_if_unavailable` set, so an outage there falls back

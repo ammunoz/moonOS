@@ -1,0 +1,41 @@
+# The moonOS prompt.
+#
+# /etc/zsh/moonos.zsh points starship here unless the user has a
+# ~/.config/starship.toml of their own. To change the prompt, copy this
+# file there:
+#
+#     cp /usr/share/moonos/starship.toml ~/.config/starship.toml
+#
+# The colours are the Nord palette the kitty configuration uses, and the
+# symbols come from the Nerd Font the image installs.
+
+format = """$directory$git_branch$git_status$cmd_duration$line_break$character"""
+
+add_newline = false
+command_timeout = 1000
+
+[character]
+success_symbol = "[❯](bold green)"
+error_symbol = "[❯](bold red)"
+
+[directory]
+style = "bold cyan"
+read_only = " ro"
+
+[git_branch]
+symbol = " "
+style = "bold purple"
+
+[git_status]
+style = "bold yellow"
+format = '([$all_status$ahead_behind]($style) )'
+
+[cmd_duration]
+min_time = 2000
+style = "bold yellow"
+format = "[took $duration]($style) "
+
+[status]
+disabled = false
+style = "bold red"
+format = "[$status]($style) "

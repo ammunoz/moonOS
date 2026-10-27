@@ -14,19 +14,22 @@ files/
 │   │   │   ├── micro.sh
 │   │   │   └── terminal.sh
 │   │   ├── skel/
-│   │   │   └── .config/
-│   │   │       ├── noctalia/
-│   │   │       │   └── 00-moonos.toml
-│   │   │       └── yazi/
-│   │   │           ├── theme.toml
-│   │   │           └── yazi.toml
-│   │   └── xdg/
-│   │       ├── kitty/
-│   │       │   └── kitty.conf
-│   │       ├── mimeapps.list
-│   │       ├── umbriel/
-│   │       │   └── config.toml
-│   │       └── xdg-terminals.list
+│   │   │   ├── .config/
+│   │   │   │   ├── noctalia/
+│   │   │   │   │   └── 00-moonos.toml
+│   │   │   │   └── yazi/
+│   │   │   │       ├── theme.toml
+│   │   │   │       └── yazi.toml
+│   │   │   └── .zshrc
+│   │   ├── xdg/
+│   │   │   ├── kitty/
+│   │   │   │   └── kitty.conf
+│   │   │   ├── mimeapps.list
+│   │   │   ├── umbriel/
+│   │   │   │   └── config.toml
+│   │   │   └── xdg-terminals.list
+│   │   └── zsh/
+│   │       └── moonos.zsh
 │   └── usr/
 │       ├── lib/
 │       │   ├── environment.d/
@@ -41,9 +44,11 @@ files/
 │       │       ├── enroll-akmods-key
 │       │       └── select-wifi-backend
 │       └── share/
-│           └── applications/
-│               ├── moonos-micro.desktop
-│               └── moonos-yazi.desktop
+│           ├── applications/
+│           │   ├── moonos-micro.desktop
+│           │   └── moonos-yazi.desktop
+│           └── moonos/
+│               └── starship.toml
 └── systemd/
     └── system/
         ├── moonos-akmods-key.service
@@ -83,10 +88,12 @@ Two things to know:
 | `etc/profile.d/terminal.sh` | sets `TERMINAL=kitty` for login shells |
 | `etc/skel/.config/noctalia/00-moonos.toml` | Noctalia defaults copied into every new account: DDC/CI brightness for external monitors |
 | `etc/skel/.config/yazi/` | the yazi defaults copied into every new account: a wider preview pane, micro as the editor, *Open in a new window* |
+| `etc/skel/.zshrc` | zsh defaults copied into every new account: the history settings |
 | `etc/xdg/kitty/kitty.conf` | system-wide kitty configuration: the Nerd Font, the Nord colours, the `icat` kitten |
 | `etc/xdg/mimeapps.list` | which application opens which file type |
 | `etc/xdg/umbriel/config.toml` | system-wide Umbriel configuration: starts Noctalia, appearance, `kitty` on `Mod+Return` |
 | `etc/xdg/xdg-terminals.list` | kitty, for applications that ask `xdg-terminal-exec` for a terminal |
+| `etc/zsh/moonos.zsh` | the starship prompt and the type-ahead completion, for every account |
 | `usr/lib/environment.d/90-micro-editor.conf` | sets `EDITOR`/`VISUAL`/`GIT_EDITOR` to `micro` for systemd services and user sessions |
 | `usr/lib/environment.d/95-terminal.conf` | sets `TERMINAL=kitty` and names the system Flatpak exports for systemd services and user sessions |
 | `usr/lib/sysusers.d/noctalia-greeter.conf` | creates the `greeter` account the Noctalia greeter runs as |
@@ -95,6 +102,7 @@ Two things to know:
 | `usr/libexec/moonos/select-wifi-backend` | picks `iwd` or `wpa_supplicant` based on the wireless hardware |
 | `usr/share/applications/moonos-micro.desktop` | micro, in a kitty window; neither micro nor yazi ships a desktop file |
 | `usr/share/applications/moonos-yazi.desktop` | yazi, in a kitty window; also the handler for folders |
+| `usr/share/moonos/starship.toml` | the prompt theme; used unless the account has a `~/.config/starship.toml` |
 
 The `environment.d` file is the important one — it is what covers a terminal
 opened from the graphical session, where `/etc/profile.d` is never sourced.
